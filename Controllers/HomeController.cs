@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace TakeoutSystem.Controllers
 {
     [Route("/Home")]
-    public class ValuesController : Controller
+    public class HomeController : Controller
     {
         // GET: /Home
         [HttpGet]
