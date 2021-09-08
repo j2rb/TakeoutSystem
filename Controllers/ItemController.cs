@@ -25,7 +25,6 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Item>>> GetItems()
         {
-            Console.WriteLine(await _context.Items.ToListAsync());
             return await _context.Items.ToListAsync();
         }
     }
