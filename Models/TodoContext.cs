@@ -17,6 +17,7 @@ namespace TakeoutSystem.Models
         {
             modelBuilder.Entity<Item>().ToTable("Items");
             modelBuilder.Entity<Order>().ToTable("Orders");
+            modelBuilder.Entity<OrderItem>().ToTable("OrderItems");
         }
 
     }

@@ -2,10 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TakeoutSystem.DTO;
 using TakeoutSystem.Models;
+
 
 namespace TakeoutSystem.Controllers
 {
@@ -14,6 +18,7 @@ namespace TakeoutSystem.Controllers
     public class MenuItemController : ControllerBase
     {
         private readonly TodoContext _context;
+        private MapperConfiguration configuration = new MapperConfiguration(cfg => cfg.CreateMap<Item, ItemDTO>());
 
         public MenuItemController(TodoContext context)
         {
@@ -23,9 +28,9 @@ namespace TakeoutSystem.Controllers
         // GET: MenuItem
         [Route("/MenuItem")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Item>>> GetItems()
+        public  List<ItemDTO> GetItems()
         {
-            return await _context.Items.ToListAsync();
+            return _context.Items.ProjectTo<ItemDTO>(configuration).ToList();
         }
     }
 }

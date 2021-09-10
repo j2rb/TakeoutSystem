@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-namespace TakeoutSystem.Models
+namespace TakeoutSystem.DTO
 {
-    public class Item
+    public class ItemDTO
     {
         public int ItemId { get; set; }
         public String Name { get; set; }
         public Decimal Price { get; set; }
-
-        public OrderItem OrderItem { get; set; }
     }
 }
+
+

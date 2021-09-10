@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using TakeoutSystem.DTO;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Controllers
@@ -14,6 +17,7 @@ namespace TakeoutSystem.Controllers
     public class OrderController : ControllerBase
     {
         private readonly TodoContext _context;
+        private MapperConfiguration configuration = new MapperConfiguration(cfg => cfg.CreateMap<Order, OrderSimpleDTO>());
 
         public OrderController(TodoContext context)
         {
@@ -23,7 +27,7 @@ namespace TakeoutSystem.Controllers
         // GET: MenuItem
         [Route("/Order")]
         [HttpGet]
-        public ActionResult<IEnumerable<object>> GetOrder(Int16? Page, Int16? PageSize, Boolean? OnlyPending)
+        public List<OrderSimpleDTO> GetOrder(Int16? Page, Int16? PageSize, Boolean? OnlyPending)
         {
             //Default values
             Page = Page == null || Page <= 0 ? 1 : Page;
@@ -31,9 +35,9 @@ namespace TakeoutSystem.Controllers
             OnlyPending = OnlyPending == null ? true : OnlyPending;
             //Get orders
             var orders = (
-                    from order in _context.Order
-                    where OnlyPending.GetValueOrDefault() == true ? order.ServedTime == null : true
-                    select new { OrderCode = order.OrderCode, ClientName = order.ClientName }
+                    _context.Order
+                    .Where(o => OnlyPending.GetValueOrDefault() == true ? o.ServedAt == null : true).
+                    ProjectTo<OrderSimpleDTO>(configuration)
                 )
                 .Skip(Page.GetValueOrDefault() * PageSize.GetValueOrDefault() - PageSize.GetValueOrDefault())
                 .Take(PageSize.GetValueOrDefault());

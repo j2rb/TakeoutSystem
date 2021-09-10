@@ -405,3 +405,16 @@ ASALocalRun/
 .localhistory/
 *.dll
 *.pdb
+obj/Debug/net5.0/ref/TakeoutSystem.dll
+obj/Debug/net5.0/TakeoutSystem.assets.cache
+obj/Debug/net5.0/TakeoutSystem.csproj.CoreCompileInputs.cache
+obj/Debug/net5.0/TakeoutSystem.csproj.FileListAbsolute.txt
+obj/Debug/net5.0/TakeoutSystem.dll
+obj/Debug/net5.0/TakeoutSystem.pdb
+obj/project.assets.json
+obj/project.nuget.cache
+obj/TakeoutSystem.csproj.nuget.dgspec.json
+bin/Debug/net5.0/ref/TakeoutSystem.dll
+bin/Debug/net5.0/TakeoutSystem.deps.json
+bin/Debug/net5.0/TakeoutSystem.dll
+bin/Debug/net5.0/TakeoutSystem.pdb
