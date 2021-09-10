@@ -64,7 +64,7 @@ namespace TakeoutSystem.Controllers
                 {
                     return StatusCode(500);
                 }
-                return new {Status = "Successful"};
+                return new { Status = "Successful" };
             }
             else
             {
@@ -72,6 +72,33 @@ namespace TakeoutSystem.Controllers
             }
         }
 
+        // POST: Served
+        [Route("/Order/Served")]
+        [HttpPost]
+        public async Task<ActionResult<Object>> ServeOrder(Order order)
+        {
+            Order record = await _context.Order.SingleOrDefaultAsync(o => (
+                    o.OrderCode.Equals(order.OrderCode) && o.ServedAt == null && o.Status == 1
+                ));
+            if (record != null)
+            {
+                record.ServedAt = DateTime.Now;
+                _context.Entry(record).State = EntityState.Modified;
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return StatusCode(500);
+                }
+                return new { Status = "Successful" };
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
         /*
         // GET: api/Order/5
         [HttpGet("{id}")]
