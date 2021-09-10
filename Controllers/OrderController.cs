@@ -36,12 +36,83 @@ namespace TakeoutSystem.Controllers
             //Get orders
             var orders = (
                     _context.Order
-                    .Where(o => (OnlyPending.GetValueOrDefault() == true ? o.ServedAt == null : true) && o.Status == 1).
-                    ProjectTo<OrderSimpleDTO>(configuration)
+                    .Where(o => (OnlyPending.GetValueOrDefault() == true ? o.ServedAt == null : true) && o.Status == 1)
+                    .ProjectTo<OrderSimpleDTO>(configuration)
                 )
                 .Skip(Page.GetValueOrDefault() * PageSize.GetValueOrDefault() - PageSize.GetValueOrDefault())
                 .Take(PageSize.GetValueOrDefault());
             return orders.ToList();
+        }
+
+        // POST: Create
+        [Route("/Order")]
+        [HttpPost]
+        public async Task<ActionResult<Object>> CreateOrder(OrderRequest orderRequest)
+        {
+            if (String.IsNullOrEmpty(orderRequest.ClientName))
+            {
+                return BadRequest();
+            }
+            if (orderRequest.Items == null || orderRequest.Items.Count == 0)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                for (var x = 0; x < orderRequest.Items.Count; x++)
+                {
+                    if (orderRequest.Items[x].ItemId <= 0)
+                    {
+                        return BadRequest();
+                    }
+                    else
+                    {
+                        IEnumerable<short> duplicates = orderRequest.Items.GroupBy(i => i.ItemId).Where(i => i.Count() > 1).Select(i => i.Key);
+                        if (duplicates.Count() > 0) {
+                            return BadRequest();
+                        }
+
+                        Item item = await _context.Items.SingleOrDefaultAsync(i => i.ItemId == orderRequest.Items[x].ItemId);
+                        if (item == null)
+                        {
+                            return BadRequest();
+                        }
+                    }
+                    if (orderRequest.Items[x].Quantity <= 0)
+                    {
+                        return BadRequest();
+                    }
+                }
+            }
+
+            Guid orderCode = Guid.NewGuid();
+            Order order = new Order
+            {
+                OrderCode = orderCode.ToString(),
+                ClientName = orderRequest.ClientName,
+                CreatedAt = DateTime.Now,
+                Status = 1
+            };
+            _context.Order.Add(order);
+            try
+            {
+                await _context.SaveChangesAsync();
+                for (var i = 0; i < orderRequest.Items.Count; i++)
+                {
+                    _context.OrderItem.Add(new OrderItem
+                    {
+                        OrderId = order.OrderId,
+                        ItemId = orderRequest.Items[i].ItemId,
+                        Quantity = orderRequest.Items[i].Quantity
+                    });
+                }
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500);
+            }
+            return new { OrderCode = order.OrderCode, ClientName = order.ClientName, Total = orderRequest.Items.Count };
         }
 
         // POST: Cancel

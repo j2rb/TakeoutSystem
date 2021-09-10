@@ -8,6 +8,6 @@ namespace TakeoutSystem.Models
         public String Name { get; set; }
         public Decimal Price { get; set; }
 
-        public OrderItem OrderItem { get; set; }
+        public List<OrderItem> OrderItems { get; set; }
     }
 }

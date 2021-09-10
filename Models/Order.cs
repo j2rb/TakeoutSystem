@@ -12,6 +12,6 @@ namespace TakeoutSystem.Models
         public DateTime? ServedAt { get; set; }
         public Byte Status { get; set; }
 
-        public OrderItem OrderItem { get; set; }
+        public List<OrderItem> OrderItems { get; set; }
     }
 }
