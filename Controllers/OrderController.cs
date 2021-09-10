@@ -24,7 +24,7 @@ namespace TakeoutSystem.Controllers
             _context = context;
         }
 
-        // GET: MenuItem
+        // GET: Order
         [Route("/Order")]
         [HttpGet]
         public List<OrderSimpleDTO> GetOrder(Int16? Page, Int16? PageSize, Boolean? OnlyPending)
@@ -36,13 +36,42 @@ namespace TakeoutSystem.Controllers
             //Get orders
             var orders = (
                     _context.Order
-                    .Where(o => OnlyPending.GetValueOrDefault() == true ? o.ServedAt == null : true).
+                    .Where(o => (OnlyPending.GetValueOrDefault() == true ? o.ServedAt == null : true) && o.Status == 1).
                     ProjectTo<OrderSimpleDTO>(configuration)
                 )
                 .Skip(Page.GetValueOrDefault() * PageSize.GetValueOrDefault() - PageSize.GetValueOrDefault())
                 .Take(PageSize.GetValueOrDefault());
             return orders.ToList();
         }
+
+        // POST: Cancel
+        [Route("/Order/Cancel")]
+        [HttpPost]
+        public async Task<ActionResult<Object>> CancelOrder(Order order)
+        {
+            Order record = await _context.Order.SingleOrDefaultAsync(o => (
+                    o.OrderCode.Equals(order.OrderCode) && o.ServedAt == null && o.Status == 1
+                ));
+            if (record != null)
+            {
+                record.Status = 0;
+                _context.Entry(record).State = EntityState.Modified;
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return StatusCode(500);
+                }
+                return new {Status = "Successful"};
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         /*
         // GET: api/Order/5
         [HttpGet("{id}")]
@@ -57,7 +86,7 @@ namespace TakeoutSystem.Controllers
 
             return order;
         }
-
+        
         // PUT: api/Order/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]

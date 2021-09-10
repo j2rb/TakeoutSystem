@@ -10,7 +10,7 @@ namespace TakeoutSystem.Models
         public String ClientName { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? ServedAt { get; set; }
-        public int Status { get; set; }
+        public Byte Status { get; set; }
 
         public OrderItem OrderItem { get; set; }
     }
