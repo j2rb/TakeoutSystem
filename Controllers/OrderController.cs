@@ -44,6 +44,49 @@ namespace TakeoutSystem.Controllers
             return orders.ToList();
         }
 
+
+        // GET: Order/Details
+        [Route("/Order/Details")]
+        [HttpGet]
+        public async Task<ActionResult<OrderDetailDTO>> GetOrderDetails(String OrderCode)
+        {
+            Order order = await _context.Order.SingleOrDefaultAsync(o => (
+                    o.OrderCode.Equals(OrderCode) && o.Status == 1
+                ));
+            if (order != null)
+            {
+                List<ItemOrderDTO> items = _context.OrderItem
+                    .Join(
+                        _context.Items, oi => oi.ItemId, i => i.ItemId, (orderItem, item) => new { orderItem, item }
+                    )
+                    .Where(oi => oi.orderItem.OrderId == order.OrderId)
+                    .Select(oi => new ItemOrderDTO {
+                        ItemId = oi.item.ItemId,
+                        Name = oi.item.Name,
+                        Price = oi.item.Price,
+                        Quantity = oi.orderItem.Quantity,
+                        Total = (oi.orderItem.Quantity * oi.item.Price)
+                    })
+                    .ToList();
+
+                OrderDetailDTO result = _context.Order
+                    .Where(o => o.OrderCode.Equals(OrderCode) && o.Status == 1)
+                    .Select(o => new OrderDetailDTO
+                    {
+                        OrderCode = o.OrderCode,
+                        ClientName = o.ClientName,
+                        Total = items.Count,
+                        Items = items
+                    })
+                    .ToList().First();
+                return result;
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         // POST: Create
         [Route("/Order")]
         [HttpPost]
@@ -68,7 +111,8 @@ namespace TakeoutSystem.Controllers
                     else
                     {
                         IEnumerable<short> duplicates = orderRequest.Items.GroupBy(i => i.ItemId).Where(i => i.Count() > 1).Select(i => i.Key);
-                        if (duplicates.Count() > 0) {
+                        if (duplicates.Count() > 0)
+                        {
                             return BadRequest();
                         }
 
