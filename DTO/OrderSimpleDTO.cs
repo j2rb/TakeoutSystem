@@ -5,5 +5,6 @@ namespace TakeoutSystem.DTO
     {
         public String OrderCode { get; set; }
         public String ClientName { get; set; }
+        public int Total { get; set; }
     }
 }
