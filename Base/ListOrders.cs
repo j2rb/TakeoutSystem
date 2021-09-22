@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Models;
 
