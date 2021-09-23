@@ -66,38 +66,19 @@ namespace TakeoutSystem.Controllers
         // POST: Cancel
         [Route("/Order/Cancel")]
         [HttpPost]
-        public Boolean CancelOrder(Order order)
+        public OrderSimpleDTO CancelOrder(Order order)
         {
-            OrderCancelation orderCancelation = new OrderCancelation(_context);
+            OrderCancellation orderCancelation = new OrderCancellation(_context);
             return orderCancelation.Cancel(order.OrderCode);
         }
 
         // POST: Served
         [Route("/Order/Served")]
         [HttpPost]
-        public async Task<ActionResult<Object>> ServeOrder(Order order)
+        public OrderSimpleDTO ServeOrder(Order order)
         {
-            Order record = await _context.Order.SingleOrDefaultAsync(o => (
-                    o.OrderCode.Equals(order.OrderCode) && o.ServedAt == null && o.Status == 1
-                ));
-            if (record != null)
-            {
-                record.ServedAt = DateTime.Now;
-                _context.Entry(record).State = EntityState.Modified;
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    return StatusCode(500);
-                }
-                return new { Status = "Successful" };
-            }
-            else
-            {
-                return NotFound();
-            }
+            OrderServe orderServe = new OrderServe(_context);
+            return orderServe.Serve(order.OrderCode);
         }
     }
 }

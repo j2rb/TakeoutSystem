@@ -74,7 +74,8 @@ namespace TakeoutSystem.Base
             {
                 throw new DbUpdateConcurrencyException();
             }
-            return new OrderSimpleDTO { OrderCode = order.OrderCode, ClientName = order.ClientName, Total = orderRequest.Items.Count };
+            OrderSimple orderSimple = new OrderSimple(_context);
+            return orderSimple.Get(order.OrderCode);
         }
     }
 }

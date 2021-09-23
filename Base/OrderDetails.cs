@@ -15,17 +15,17 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public OrderDetailDTO GetOrder(String OrderCode)
+        public OrderDetailDTO GetOrder(String orderCode)
         {
             Order order = _context.Order.SingleOrDefault(o => (
-                    o.OrderCode.Equals(OrderCode) && o.Status == 1
+                    o.OrderCode.Equals(orderCode) && o.Status == 1
                 ));
             if (order != null)
             {
                 ListOrderItems listOrderItems = new ListOrderItems(_context);
                 List<ItemOrderDTO> items = listOrderItems.GetList(order.OrderId);
                 return _context.Order
-                    .Where(o => o.OrderCode.Equals(OrderCode) && o.Status == 1)
+                    .Where(o => o.OrderCode.Equals(orderCode) && o.Status == 1)
                     .Select(o => new OrderDetailDTO
                     {
                         OrderCode = o.OrderCode,

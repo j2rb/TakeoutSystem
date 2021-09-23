@@ -6,23 +6,23 @@ using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class OrderCancelation
+    public class OrderServe
     {
         private readonly TodoContext _context;
 
-        public OrderCancelation(TodoContext context)
+        public OrderServe(TodoContext context)
         {
             _context = context;
         }
 
-        public Boolean Cancel(String orderCode)
+        public OrderSimpleDTO Serve(String orderCode)
         {
-            Order order = _context.Order.SingleOrDefault(o => (
-                o.OrderCode.Equals(orderCode) && o.ServedAt == null && o.Status == 1
-            ));
+            Order order =  _context.Order.SingleOrDefault(o => (
+                    o.OrderCode.Equals(orderCode) && o.ServedAt == null && o.Status == 1
+                ));
             if (order != null)
             {
-                order.Status = 0;
+                order.ServedAt = DateTime.Now;
                 _context.Entry(order).State = EntityState.Modified;
                 try
                 {
@@ -32,11 +32,12 @@ namespace TakeoutSystem.Base
                 {
                     throw new DbUpdateConcurrencyException();
                 }
-                return true;
+                OrderSimple orderSimple = new OrderSimple(_context);
+                return orderSimple.Get(orderCode);
             }
             else
             {
-                return false;
+                return null;
             }
         }
     }
