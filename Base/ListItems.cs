@@ -4,11 +4,12 @@ using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class ListItems
+    public class ListItems : IListItems
     {
         private readonly TodoContext _context;
         private readonly IMapper _mapper;
@@ -19,7 +20,7 @@ namespace TakeoutSystem.Base
             _mapper = mapper;
         }
 
-        public List<ItemDTO> GetList()
+        public List<ItemDTO> Get()
         {
             return _context.Items.ProjectTo<ItemDTO>(_mapper.ConfigurationProvider).ToList();
         }

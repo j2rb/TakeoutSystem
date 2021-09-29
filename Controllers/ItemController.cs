@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Models;
 using TakeoutSystem.Base;
+using TakeoutSystem.Interfaces;
+using System;
 
 namespace TakeoutSystem.Controllers
 {
@@ -23,10 +25,17 @@ namespace TakeoutSystem.Controllers
         // GET: MenuItem
         [Route("/MenuItem")]
         [HttpGet]
-        public  List<ItemDTO> GetItems()
+        public ActionResult<List<ItemDTO>> GetItems()
         {
-            ListItems listItems = new ListItems(_context, _mapper);
-            return listItems.GetList();
+            try
+            {
+                IListItems listItems = new ListItems(_context, _mapper);
+                return listItems.Get();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
     }
 }

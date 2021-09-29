@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class OrderDetails
+    public class OrderDetails : IOrderDetails
     {
         private readonly TodoContext _context;
 
@@ -15,15 +16,15 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public OrderDetailDTO GetOrder(String orderCode)
+        public OrderDetailDTO Get(String orderCode)
         {
             Order order = _context.Order.SingleOrDefault(o => (
                     o.OrderCode.Equals(orderCode) && o.Status == 1
                 ));
             if (order != null)
             {
-                ListOrderItems listOrderItems = new ListOrderItems(_context);
-                List<ItemOrderDTO> items = listOrderItems.GetList(order.OrderId);
+                IListOrderItems listOrderItems = new ListOrderItems(_context);
+                List<ItemOrderDTO> items = listOrderItems.Get(order.OrderId);
                 return _context.Order
                     .Where(o => o.OrderCode.Equals(orderCode) && o.Status == 1)
                     .Select(o => new OrderDetailDTO

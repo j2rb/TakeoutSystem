@@ -2,11 +2,12 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class OrderCancellation
+    public class OrderCancellation : IOrderCancellation
     {
         private readonly TodoContext _context;
 

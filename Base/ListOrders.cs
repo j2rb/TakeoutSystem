@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class ListOrders
+    public class ListOrders : IListOrders
     {
         private readonly TodoContext _context;
-        private readonly IMapper _mapper;
 
-        public ListOrders(TodoContext context, IMapper mapper)
+        public ListOrders(TodoContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
-        public List<OrderSimpleDTO> GetList(Int16? Page, Int16? PageSize, Boolean? OnlyPending)
+        public List<OrderSimpleDTO> Get(Int16? Page, Int16? PageSize, Boolean? OnlyPending)
         {
             //Default values
             Page = Page == null || Page <= 0 ? 1 : Page;

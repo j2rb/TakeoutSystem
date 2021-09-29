@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class OrderCreation
+    public class OrderCreation : IOrderCreation
     {
         private readonly TodoContext _context;
 
@@ -28,6 +29,11 @@ namespace TakeoutSystem.Base
             }
             else
             {
+                IEnumerable<short> duplicates = orderRequest.Items.GroupBy(i => i.ItemId).Where(i => i.Count() > 1).Select(i => i.Key);
+                if (duplicates.Count() > 0)
+                {
+                    throw new ArgumentException();
+                }
                 for (var x = 0; x < orderRequest.Items.Count; x++)
                 {
                     if (orderRequest.Items[x].ItemId <= 0)
@@ -36,12 +42,6 @@ namespace TakeoutSystem.Base
                     }
                     else
                     {
-                        IEnumerable<short> duplicates = orderRequest.Items.GroupBy(i => i.ItemId).Where(i => i.Count() > 1).Select(i => i.Key);
-                        if (duplicates.Count() > 0)
-                        {
-                            throw new ArgumentException();
-                        }
-
                         Item item = _context.Items.SingleOrDefault(i => i.ItemId == orderRequest.Items[x].ItemId);
                         if (item == null)
                         {
@@ -55,10 +55,10 @@ namespace TakeoutSystem.Base
                 }
             }
 
-            Guid orderCode = Guid.NewGuid();
+            IOrderCodeGenerator orderCodeGenerator = new OrderCodeGenerator();
             Order order = new Order
             {
-                OrderCode = orderCode.ToString(),
+                OrderCode = orderCodeGenerator.GetCode(),
                 ClientName = orderRequest.ClientName,
                 CreatedAt = DateTime.Now,
                 Status = 1
@@ -67,7 +67,7 @@ namespace TakeoutSystem.Base
             try
             {
                 _context.SaveChanges();
-                OrderItemCreation orderItemCreation = new OrderItemCreation(_context);
+                IOrderItemCreation orderItemCreation = new OrderItemCreation(_context);
                 orderItemCreation.Create(order.OrderId, orderRequest.Items);
             }
             catch (DbUpdateConcurrencyException)

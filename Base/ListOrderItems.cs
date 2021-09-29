@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class ListOrderItems
+    public class ListOrderItems : IListOrderItems
     {
         private readonly TodoContext _context;
 
@@ -15,7 +16,7 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public List<ItemOrderDTO> GetList(int OrderId)
+        public List<ItemOrderDTO> Get(int OrderId)
         {
             return _context.OrderItem
                 .Join(

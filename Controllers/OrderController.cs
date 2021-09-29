@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TakeoutSystem.Base;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Controllers
@@ -29,10 +30,17 @@ namespace TakeoutSystem.Controllers
         // GET: Order
         [Route("/Order")]
         [HttpGet]
-        public List<OrderSimpleDTO> GetOrder(Int16? Page, Int16? PageSize, Boolean? OnlyPending)
+        public ActionResult<List<OrderSimpleDTO>> GetOrder(Int16? Page, Int16? PageSize, Boolean? OnlyPending)
         {
-            ListOrders listOrders = new ListOrders(_context, _mapper);
-            return listOrders.GetList(Page, PageSize, OnlyPending);
+            try
+            {
+                IListOrders listOrders = new ListOrders(_context);
+                return listOrders.Get(Page, PageSize, OnlyPending);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
 
 
@@ -41,44 +49,91 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public ActionResult<OrderDetailDTO> GetOrderDetails(String OrderCode)
         {
-
-            OrderDetails orderDetails = new OrderDetails(_context);
-            OrderDetailDTO order = orderDetails.GetOrder(OrderCode);
-            if (order != null)
+            try
             {
-                return order;
+                IOrderDetails orderDetails = new OrderDetails(_context);
+                OrderDetailDTO order = orderDetails.Get(OrderCode);
+                if (order != null)
+                {
+                    return order;
+                }
+                else
+                {
+                    return NotFound();
+                }
             }
-            else
+            catch (Exception)
             {
-                return NotFound();
+                return StatusCode(500);
             }
         }
 
         // POST: Create
         [Route("/Order")]
         [HttpPost]
-        public OrderSimpleDTO CreateOrder(OrderRequest orderRequest)
+        public ActionResult<OrderSimpleDTO> CreateOrder(OrderRequest orderRequest)
         {
-            OrderCreation orderCreation = new OrderCreation(_context);
-            return orderCreation.Create(orderRequest);
+            try
+            {
+                IOrderCreation orderCreation = new OrderCreation(_context);
+                return orderCreation.Create(orderRequest);
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
 
         // POST: Cancel
         [Route("/Order/Cancel")]
         [HttpPost]
-        public OrderSimpleDTO CancelOrder(Order order)
+        public ActionResult<OrderSimpleDTO> CancelOrder(Order order)
         {
-            OrderCancellation orderCancelation = new OrderCancellation(_context);
-            return orderCancelation.Cancel(order.OrderCode);
+            try
+            {
+                IOrderCancellation orderCancelation = new OrderCancellation(_context);
+                OrderSimpleDTO response = orderCancelation.Cancel(order.OrderCode);
+                if (response != null)
+                {
+                    return response;
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
 
         // POST: Served
         [Route("/Order/Served")]
         [HttpPost]
-        public OrderSimpleDTO ServeOrder(Order order)
+        public ActionResult<OrderSimpleDTO> ServeOrder(Order order)
         {
-            OrderServe orderServe = new OrderServe(_context);
-            return orderServe.Serve(order.OrderCode);
+            try
+            {
+                IOrderServe orderServe = new OrderServe(_context);
+                OrderSimpleDTO response = orderServe.Serve(order.OrderCode);
+                if (response != null)
+                {
+                    return response;
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception)
+            {
+                return StatusCode(500);
+            }
         }
     }
 }

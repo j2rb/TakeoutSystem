@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 namespace TakeoutSystem.Base
 {
-    public class OrderItemCreation
+    public class OrderItemCreation : IOrderItemCreation
     {
         private readonly TodoContext _context;
 

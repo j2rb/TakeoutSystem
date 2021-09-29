@@ -2,11 +2,12 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using TakeoutSystem.DTO;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class OrderServe
+    public class OrderServe : IOrderServe
     {
         private readonly TodoContext _context;
 
