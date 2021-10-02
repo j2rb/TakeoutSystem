@@ -18,7 +18,7 @@ namespace TakeoutSystem.Base
 
         public OrderSimpleDTO Serve(String orderCode)
         {
-            Order order =  _context.Order.SingleOrDefault(o => (
+            Order order =  _context.Orders.SingleOrDefault(o => (
                     o.OrderCode.Equals(orderCode) && o.ServedAt == null && o.Status == 1
                 ));
             if (order != null)
@@ -33,7 +33,7 @@ namespace TakeoutSystem.Base
                 {
                     throw new DbUpdateConcurrencyException();
                 }
-                OrderSimple orderSimple = new OrderSimple(_context);
+                IOrderSimple orderSimple = new OrderSimple(_context);
                 return orderSimple.Get(orderCode);
             }
             else

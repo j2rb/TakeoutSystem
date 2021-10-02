@@ -7,8 +7,8 @@ namespace TakeoutSystem.Models
     public class TodoContext : DbContext
     {
         public DbSet<Item> Items { get; set; }
-        public DbSet<Order> Order { get; set; }
-        public DbSet<OrderItem> OrderItem { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
         public TodoContext(DbContextOptions<TodoContext> options) : base(options)
         {

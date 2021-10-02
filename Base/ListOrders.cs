@@ -24,9 +24,9 @@ namespace TakeoutSystem.Base
             OnlyPending = OnlyPending == null ? true : OnlyPending;
             //Get orders
             return (
-                    _context.Order
+                    _context.Orders
                     .Join(
-                        _context.OrderItem, o => o.OrderId, oi => oi.OrderId, (order, orderItem) => new { order, orderItem }
+                        _context.OrderItems, o => o.OrderId, oi => oi.OrderId, (order, orderItem) => new { order, orderItem }
                     )
                     .Where(o => (OnlyPending.GetValueOrDefault() == true ? o.order.ServedAt == null : true) && o.order.Status == 1)
                     .GroupBy(o => new { o.order.OrderCode, o.order.ClientName, o.order.CreatedAt })

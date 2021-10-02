@@ -18,7 +18,7 @@ namespace TakeoutSystem.Base
 
         public List<ItemOrderDTO> Get(int OrderId)
         {
-            return _context.OrderItem
+            return _context.OrderItems
                 .Join(
                     _context.Items, oi => oi.ItemId, i => i.ItemId, (orderItem, item) => new { orderItem, item }
                 )

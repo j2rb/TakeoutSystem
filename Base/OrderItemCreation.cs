@@ -21,7 +21,7 @@ namespace TakeoutSystem.Base
             {
                 for (var i = 0; i < itemRequest.Count; i++)
                 {
-                    _context.OrderItem.Add(new OrderItem
+                    _context.OrderItems.Add(new OrderItem
                     {
                         OrderId = orderId,
                         ItemId = itemRequest[i].ItemId,

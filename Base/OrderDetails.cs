@@ -18,14 +18,14 @@ namespace TakeoutSystem.Base
 
         public OrderDetailDTO Get(String orderCode)
         {
-            Order order = _context.Order.SingleOrDefault(o => (
+            Order order = _context.Orders.SingleOrDefault(o => (
                     o.OrderCode.Equals(orderCode) && o.Status == 1
                 ));
             if (order != null)
             {
                 IListOrderItems listOrderItems = new ListOrderItems(_context);
                 List<ItemOrderDTO> items = listOrderItems.Get(order.OrderId);
-                return _context.Order
+                return _context.Orders
                     .Where(o => o.OrderCode.Equals(orderCode) && o.Status == 1)
                     .Select(o => new OrderDetailDTO
                     {
