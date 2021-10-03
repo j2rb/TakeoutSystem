@@ -23,9 +23,9 @@ namespace TakeoutSystem.Base
             ITotalOrders totalOrders = new TotalOrders(_context);
             return new OrderStatisticsDTO {
                 MostSoldItems = mostSoldItems.Get(),
-                AverageServeTimeInSeconds = averageServeTime.Get(),
-                AverageItemsPerOrder = averageItemsPerOrder.Get(),
-                CanceledOrdersPercentage = canceledOrdersPercentage.Get(),
+                AverageServeTimeInSeconds = Math.Round(averageServeTime.Get(), 2),
+                AverageItemsPerOrder = Math.Round(averageItemsPerOrder.Get(), 2),
+                CanceledOrdersPercentage = Math.Round(canceledOrdersPercentage.Get(), 2),
                 TotalOrders = totalOrders.Get()
             };
         }

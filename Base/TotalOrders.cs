@@ -1,4 +1,5 @@
-﻿using TakeoutSystem.Interfaces;
+﻿using System.Linq;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
@@ -14,7 +15,8 @@ namespace TakeoutSystem.Base
 
         public int Get()
         {
-            throw new System.NotImplementedException();
+            return _context.Orders
+               .Count(o => o.Status == 1);
         }
     }
 }

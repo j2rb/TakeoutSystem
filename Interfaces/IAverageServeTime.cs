@@ -3,6 +3,6 @@ namespace TakeoutSystem.Interfaces
 {
     public interface IAverageServeTime
     {
-        public float Get();
+        public decimal Get();
     }
 }

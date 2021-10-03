@@ -3,6 +3,6 @@ namespace TakeoutSystem.Interfaces
 {
     public interface ICanceledOrdersPercentage
     {
-        public float Get();
+        public decimal Get();
     }
 }

@@ -1,4 +1,6 @@
-﻿using TakeoutSystem.Interfaces;
+﻿using System;
+using System.Linq;
+using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
@@ -12,9 +14,16 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public float Get()
+        public decimal Get()
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                return (decimal)_context.Orders.Count(o => o.Status == 0) / _context.Orders.Count() * 100;
+            }
+            catch (DivideByZeroException)
+            {
+                return 0;
+            }
         }
     }
 }

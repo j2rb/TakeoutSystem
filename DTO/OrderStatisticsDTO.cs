@@ -6,9 +6,9 @@ namespace TakeoutSystem.DTO
     public class OrderStatisticsDTO
     {
         public List<ItemSimpleDTO> MostSoldItems { get; set; }
-        public float AverageServeTimeInSeconds { get; set; }
-        public float AverageItemsPerOrder { get; set; }
-        public float CanceledOrdersPercentage { get; set; }
+        public decimal AverageServeTimeInSeconds { get; set; }
+        public decimal AverageItemsPerOrder { get; set; }
+        public decimal CanceledOrdersPercentage { get; set; }
         public int TotalOrders { get; set; }
     }
 }
