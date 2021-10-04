@@ -20,6 +20,7 @@
     <None Remove="BaseClasses\" />
     <None Remove="Interfaces\" />
     <None Remove="Exceptions\" />
+    <None Remove="EPPlus" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
@@ -42,5 +43,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="EPPlus" Version="5.7.5" />
   </ItemGroup>
 </Project>
