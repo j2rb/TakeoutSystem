@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using TakeoutSystem.Models;
+using TakeoutSystem.Interfaces;
+using TakeoutSystem.Base;
 
 namespace TakeoutSystem
 {
@@ -29,6 +26,11 @@ namespace TakeoutSystem
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers().AddJsonOptions(opt => opt.JsonSerializerOptions.PropertyNamingPolicy = null);
             services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<IItemService, ItemService>();
+            services.AddScoped<IOrderService, OrderService>();
+            //services.AddScoped<IOrderStatistics, OrderStatisticts>();
+            //services.AddScoped<IFTP, FTP>();
+            //services.AddScoped<IOrderCreationItem, Oreder...>;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

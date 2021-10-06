@@ -13,13 +13,11 @@ namespace TakeoutSystem.Controllers
     [ApiController]
     public class MenuItemController : ControllerBase
     {
-        private readonly TodoContext _context;
-        private readonly IMapper _mapper;
+        private readonly IItemService _itemService;
 
-        public MenuItemController(TodoContext context, IMapper mapper)
+        public MenuItemController(IItemService itemService)
         {
-            _context = context;
-            _mapper = mapper;
+            _itemService = itemService;
         }
 
         // GET: MenuItem
@@ -29,8 +27,7 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                IListItems listItems = new ListItems(_context, _mapper);
-                return listItems.Get();
+                return _itemService.GetItems();
             }
             catch (Exception)
             {

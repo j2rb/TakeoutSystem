@@ -17,13 +17,13 @@ namespace TakeoutSystem.Controllers
     [ApiController]
     public class ReportController : ControllerBase
     {
-        private readonly TodoContext _context;
         private readonly IMapper _mapper;
+        private readonly IOrderStatistics _orderStatisticts; 
 
-        public ReportController(TodoContext context, IMapper mapper)
+        public ReportController(IMapper mapper, IOrderStatistics orderStatisticts)
         {
-            _context = context;
             _mapper = mapper;
+            _orderStatisticts = orderStatisticts;
         }
 
         // GET: Reports
@@ -33,8 +33,7 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                IOrderStatistics orderStatistics = new OrderStatisticts(_context);
-                return orderStatistics.Get();
+                return _orderStatisticts.Get();
             }
             catch (Exception)
             {
@@ -43,7 +42,7 @@ namespace TakeoutSystem.Controllers
         }
 
         // GET: Orders
-        [Route("/Reports/Orders")]
+        /*[Route("/Reports/Orders")]
         [HttpGet]
         public IActionResult GetExcelReport(String StartDate, String EndDate)
         {
@@ -61,6 +60,6 @@ namespace TakeoutSystem.Controllers
             String fileName = "TakeoutReport_" + startDate.ToString("yyyy-MM-dd") + "_to_" + endDate.ToString("yyyy-MM-dd") + ".xlsx";
             IOrderReport orderReport = new OrderReportExcel(_context);
             return File(orderReport.Get(startDate, endDate), contentType, fileName);
-        }
+        }*/
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using TakeoutSystem.Base;
@@ -14,11 +15,13 @@ namespace TakeoutSystem.Controllers
     public class OrderController : ControllerBase
     {
         private readonly TodoContext _context;
+        private readonly IOrderService _orderService;
         private readonly IMapper _mapper;
 
-        public OrderController(TodoContext context, IMapper mapper)
+        public OrderController(TodoContext context, IMapper mapper, IOrderService orderService)
         {
             _context = context;
+            _orderService = orderService;
             _mapper = mapper;
         }
 
@@ -29,8 +32,13 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                IListOrders listOrders = new ListOrders(_context);
-                return listOrders.Get(Page, PageSize, OnlyPending);
+                var orders = _orderService.GetOrders(new OrderRequest { page = Page, pageSize = PageSize, onlyPending = OnlyPending });
+                return orders.Select(o => new OrderSimpleDTO
+                {
+                    OrderCode = o.OrderCode,
+                    ClientName = o.ClientName,
+                    Total = o.Total,
+                }).ToList();
             }
             catch (Exception)
             {
@@ -46,8 +54,7 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                IOrderDetails orderDetails = new OrderDetails(_context);
-                OrderDetailDTO order = orderDetails.Get(OrderCode);
+                var order = _orderService.GetOrder(OrderCode);
                 if (order != null)
                 {
                     return order;
@@ -66,12 +73,11 @@ namespace TakeoutSystem.Controllers
         // POST: Create
         [Route("/Order")]
         [HttpPost]
-        public ActionResult<OrderSimpleDTO> CreateOrder(OrderRequest orderRequest)
+        public ActionResult<OrderSimpleDTO> CreateOrder(OrderCreationRequest orderRequest)
         {
             try
             {
-                IOrderCreation orderCreation = new OrderCreation(_context);
-                return orderCreation.Create(orderRequest);
+                return _orderService.Create(orderRequest);
             }
             catch (ArgumentException)
             {
@@ -86,15 +92,14 @@ namespace TakeoutSystem.Controllers
         // POST: Cancel
         [Route("/Order/Cancel")]
         [HttpPost]
-        public ActionResult<OrderSimpleDTO> CancelOrder(Order order)
+        public ActionResult<OrderDetailDTO> CancelOrder(OrderActionRequest orderActionRequest)
         {
             try
             {
-                IOrderCancellation orderCancelation = new OrderCancellation(_context);
-                OrderSimpleDTO response = orderCancelation.Cancel(order.OrderCode);
-                if (response != null)
+                var order = _orderService.Cancel(orderActionRequest);
+                if (order != null)
                 {
-                    return response;
+                    return order;
                 }
                 else
                 {
@@ -110,15 +115,14 @@ namespace TakeoutSystem.Controllers
         // POST: Served
         [Route("/Order/Served")]
         [HttpPost]
-        public ActionResult<OrderSimpleDTO> ServeOrder(Order order)
+        public ActionResult<OrderDetailDTO> ServeOrder(OrderActionRequest orderActionRequest)
         {
             try
             {
-                IOrderServe orderServe = new OrderServe(_context);
-                OrderSimpleDTO response = orderServe.Serve(order.OrderCode);
-                if (response != null)
+                var order = _orderService.Serve(orderActionRequest);
+                if (order != null)
                 {
-                    return response;
+                    return order;
                 }
                 else
                 {

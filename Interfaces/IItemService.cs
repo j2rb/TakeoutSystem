@@ -4,8 +4,8 @@ using TakeoutSystem.DTO;
 
 namespace TakeoutSystem.Interfaces
 {
-    public interface IOrderItemCreation
+    public interface IItemService
     {
-        public void Create(int orderId, List<ItemRequest> itemRequest);
+        public List<ItemDTO> GetItems();
     }
 }

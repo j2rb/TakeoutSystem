@@ -9,18 +9,18 @@ using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
 {
-    public class ListItems : IListItems
+    public class ItemService : IItemService
     {
         private readonly TodoContext _context;
         private readonly IMapper _mapper;
 
-        public ListItems(TodoContext context, IMapper mapper)
+        public ItemService(TodoContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
         }
 
-        public List<ItemDTO> Get()
+        public List<ItemDTO> GetItems()
         {
             return _context.Items.ProjectTo<ItemDTO>(_mapper.ConfigurationProvider).ToList();
         }
