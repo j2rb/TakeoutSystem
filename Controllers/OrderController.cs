@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using TakeoutSystem.Base;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
@@ -14,25 +12,27 @@ namespace TakeoutSystem.Controllers
     [ApiController]
     public class OrderController : ControllerBase
     {
-        private readonly TodoContext _context;
         private readonly IOrderService _orderService;
-        private readonly IMapper _mapper;
 
-        public OrderController(TodoContext context, IMapper mapper, IOrderService orderService)
+        public OrderController(IOrderService orderService)
         {
-            _context = context;
             _orderService = orderService;
-            _mapper = mapper;
         }
 
         // GET: Order
         [Route("/Order")]
         [HttpGet]
-        public ActionResult<List<OrderSimpleDTO>> GetOrder(Int16? Page, Int16? PageSize, Boolean? OnlyPending)
+        public ActionResult<List<OrderSimpleDTO>> GetOrder(int? Page, int? PageSize, bool? OnlyPending)
         {
             try
             {
-                var orders = _orderService.GetOrders(new OrderRequest { page = Page, pageSize = PageSize, onlyPending = OnlyPending });
+                var orderRequest = new OrderRequest {
+                    page = Page == null || Page <= 0 ? 1 : Page,
+                    pageSize = PageSize == null || PageSize <= 0 ? 10 : PageSize,
+                    onlyPending = OnlyPending == null ? true : OnlyPending,
+                    status = 1
+                };
+                var orders = _orderService.GetOrders(orderRequest);
                 return orders.Select(o => new OrderSimpleDTO
                 {
                     OrderCode = o.OrderCode,

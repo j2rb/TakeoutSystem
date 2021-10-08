@@ -28,9 +28,7 @@ namespace TakeoutSystem
             services.AddDbContext<TodoContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IOrderService, OrderService>();
-            //services.AddScoped<IOrderStatistics, OrderStatisticts>();
-            //services.AddScoped<IFTP, FTP>();
-            //services.AddScoped<IOrderCreationItem, Oreder...>;
+            services.AddScoped<IOrderStatistics, OrderStatisticts>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

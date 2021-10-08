@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using OfficeOpenXml;
-using TakeoutSystem.Base;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
-using TakeoutSystem.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -17,12 +12,10 @@ namespace TakeoutSystem.Controllers
     [ApiController]
     public class ReportController : ControllerBase
     {
-        private readonly IMapper _mapper;
         private readonly IOrderStatistics _orderStatisticts; 
 
-        public ReportController(IMapper mapper, IOrderStatistics orderStatisticts)
+        public ReportController(IOrderStatistics orderStatisticts)
         {
-            _mapper = mapper;
             _orderStatisticts = orderStatisticts;
         }
 
@@ -33,7 +26,13 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                return _orderStatisticts.Get();
+                return new OrderStatisticsDTO {
+                    MostSoldItems = _orderStatisticts.GetMostSoldItems(),
+                    AverageServeTimeInSeconds = _orderStatisticts.GetAverageServeTime(),
+                    AverageItemsPerOrder = _orderStatisticts.GetAverageItemsPerOrder(),
+                    CanceledOrdersPercentage = _orderStatisticts.CanceledOrdersPercentage(),
+                    TotalOrders = _orderStatisticts.GetCount()
+                };
             }
             catch (Exception)
             {

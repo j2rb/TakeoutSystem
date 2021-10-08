@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
@@ -7,27 +9,68 @@ namespace TakeoutSystem.Base
 {
     public class OrderStatisticts : IOrderStatistics
     {
-        private readonly TodoContext _context;
+        private readonly IOrderService _orderService;
 
-        public OrderStatisticts(TodoContext context)
+        public OrderStatisticts(IOrderService orderService)
         {
-            _context = context;
+            _orderService = orderService;
         }
 
-        public OrderStatisticsDTO Get()
+        public decimal CanceledOrdersPercentage()
         {
-            IMostSoldItems mostSoldItems = new MostSoldItems(_context);
-            IAverageServeTime averageServeTime = new AverageServeTime(_context);
-            IAverageItemsPerOrder averageItemsPerOrder = new AverageItemsPerOrder(_context);
-            ICanceledOrdersPercentage canceledOrdersPercentage = new CanceledOrdersPercentage(_context);
-            ITotalOrders totalOrders = new TotalOrders(_context);
-            return new OrderStatisticsDTO {
-                MostSoldItems = mostSoldItems.Get(),
-                AverageServeTimeInSeconds = Math.Round(averageServeTime.Get(), 2),
-                AverageItemsPerOrder = Math.Round(averageItemsPerOrder.Get(), 2),
-                CanceledOrdersPercentage = Math.Round(canceledOrdersPercentage.Get(), 2),
-                TotalOrders = totalOrders.Get()
-            };
+            try
+            {
+                var allOrders = _orderService.GetOrders(new OrderRequest { });
+                return (decimal) allOrders.Count(o => o.Status == 0) / allOrders.Count() * 100;
+            }
+            catch (DivideByZeroException)
+            {
+                return 0;
+            }
+        }
+
+        public decimal GetAverageItemsPerOrder()
+        {
+            var orders = _orderService.GetOrders(new OrderRequest { status = 1 });
+            try
+            {
+                return (decimal) orders.Sum(o => o.Items.Sum(i => i.Quantity)) / orders.Count();
+            }
+            catch (DivideByZeroException)
+            {
+                return 0;
+            }
+        }
+
+        public decimal GetAverageServeTime()
+        {
+            try
+            {
+                var servedOrders = _orderService.GetOrders(new OrderRequest { status = 1, served = true });
+                return (decimal) servedOrders.Sum(o => (o.ServedAt.GetValueOrDefault() - o.CreatedAt).TotalSeconds) / servedOrders.Count();
+            }
+            catch (DivideByZeroException)
+            {
+                return 0;
+            }
+        }
+
+        public int GetCount()
+        {
+           return _orderService.GetOrders(new OrderRequest { }).Count();
+        }
+
+        public List<ItemSimpleDTO> GetMostSoldItems()
+        {
+            return _orderService.GetOrderItems(null)
+                .GroupBy(i => new { i.ItemId, i.Name })
+                .OrderByDescending(i => i.Sum(i => i.Quantity))
+                .Take(2)
+                .Select(oi => new ItemSimpleDTO
+                {
+                    ItemId = oi.Key.ItemId,
+                    Name = oi.Key.Name
+                }).ToList();
         }
     }
 }

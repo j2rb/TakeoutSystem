@@ -19,24 +19,44 @@ namespace TakeoutSystem.Base
 
         public List<OrderDetailDTO> GetOrders(OrderRequest orderRequest)
         {
-            orderRequest.page = orderRequest.page == null || orderRequest.page <= 0 ? 1 : orderRequest.page;
-            orderRequest.pageSize = orderRequest.pageSize == null || orderRequest.pageSize <= 0 ? 10 : orderRequest.pageSize;
-            orderRequest.onlyPending = orderRequest.onlyPending == null ? true : orderRequest.onlyPending;
-            var query = _context.Orders
-                .Where(o => o.Status == 1);
-            
+            var query = _context.Orders.AsQueryable();
+
+            if (orderRequest.status != null)
+            {
+                query = query.Where(o => o.Status == orderRequest.status);
+            }
+
+            if (orderRequest.served == true)
+            {
+                query = query.Where(o => o.ServedAt != null);
+            }
+
             if (orderRequest.onlyPending.GetValueOrDefault() == true)
             {
                 query = query.Where(o => o.ServedAt == null);
             }
+
+            if (orderRequest.page != null)
+            {
+                query = query.Skip(
+                    orderRequest.page.GetValueOrDefault() * orderRequest.pageSize.GetValueOrDefault() - orderRequest.pageSize.GetValueOrDefault()
+                );
+            }
+
+            if (orderRequest.pageSize != null)
+            {
+                query = query.Take(orderRequest.pageSize.GetValueOrDefault());
+            }
+
             var orders = query.Select(o => new OrderDetailDTO
             {
                 OrderCode = o.OrderCode,
-                ClientName = o.ClientName
+                ClientName = o.ClientName,
+                CreatedAt = o.CreatedAt,
+                ServedAt = o.ServedAt,
+                Status = o.Status
             })
-                .Skip(orderRequest.page.GetValueOrDefault() * orderRequest.pageSize.GetValueOrDefault() - orderRequest.pageSize.GetValueOrDefault())
-                .Take(orderRequest.pageSize.GetValueOrDefault())
-                .ToList();
+                .ToList();                
             for (var i = 0; i < orders.Count; i++)
             {
                 var orderItems = GetOrderItems(orders[i].OrderCode);
@@ -48,9 +68,7 @@ namespace TakeoutSystem.Base
 
         public OrderDetailDTO GetOrder(String orderCode)
         {
-            Order order = _context.Orders.SingleOrDefault(o => (
-                   o.OrderCode.Equals(orderCode) && o.Status == 1
-               ));
+            Order order = _context.Orders.SingleOrDefault(o => o.OrderCode.Equals(orderCode));
             if (order != null)
             {
                 var orderItems = GetOrderItems(orderCode);
@@ -60,6 +78,9 @@ namespace TakeoutSystem.Base
                     {
                         OrderCode = o.OrderCode,
                         ClientName = o.ClientName,
+                        Status = o.Status,
+                        CreatedAt = o.CreatedAt,
+                        ServedAt = o.ServedAt,
                         Total = orderItems.Count(),
                         Items = orderItems
                     })
@@ -80,7 +101,7 @@ namespace TakeoutSystem.Base
                 .Join(
                     _context.Orders, oi => oi.orderItem.OrderId, o => o.OrderId, (orderItem, order) => new { orderItem.orderItem, orderItem.item, order }
                 )
-                .Where(oi => oi.order.OrderCode.Equals(orderCode))
+                .Where(oi => String.IsNullOrEmpty(orderCode) ? true : oi.order.OrderCode.Equals(orderCode))
                 .Select(oi => new ItemOrderDTO
                 {
                     ItemId = oi.item.ItemId,
@@ -183,14 +204,13 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public OrderDetailDTO Serve(OrderActionRequest orderCreationRequest)
+        public OrderDetailDTO Serve(OrderActionRequest orderActionRequest)
         {
             var order = _context.Orders.SingleOrDefault(o => (
-                   o.OrderCode.Equals(orderCreationRequest.OrderCode) && o.ServedAt == null && o.Status == 1
+                   o.OrderCode.Equals(orderActionRequest.OrderCode) && o.ServedAt == null && o.Status == 1
                ));
             if (order != null)
             {
-                var result = GetOrder(orderCreationRequest.OrderCode);
                 order.ServedAt = DateTime.Now;
                 _context.Entry(order).State = EntityState.Modified;
                 try
@@ -201,7 +221,7 @@ namespace TakeoutSystem.Base
                 {
                     throw new DbUpdateConcurrencyException();
                 }
-                return result;
+                return GetOrder(orderActionRequest.OrderCode);
             }
             else
             {
