@@ -3,10 +3,12 @@ namespace TakeoutSystem.Models
 {
     public class OrderRequest
     {
-        public int? page { get; set; }
-        public int? pageSize { get; set; }
-        public bool? onlyPending { get; set; }
-        public int? status { get; set; }
-        public bool? served { get; set; }
+        public int? Page { get; set; }
+        public int? PageSize { get; set; }
+        public bool? OnlyPending { get; set; }
+        public int? Status { get; set; }
+        public bool? Served { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

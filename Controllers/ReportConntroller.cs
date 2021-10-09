@@ -1,8 +1,9 @@
 ﻿using System;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using TakeoutSystem.Base;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
+using TakeoutSystem.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,11 +13,13 @@ namespace TakeoutSystem.Controllers
     [ApiController]
     public class ReportController : ControllerBase
     {
-        private readonly IOrderStatistics _orderStatisticts; 
+        private readonly IOrderStatistics _orderStatisticts;
+        private readonly IOrderReport _orderReport;
 
-        public ReportController(IOrderStatistics orderStatisticts)
+        public ReportController(IOrderStatistics orderStatisticts, IOrderReport orderReport)
         {
             _orderStatisticts = orderStatisticts;
+            _orderReport = orderReport;
         }
 
         // GET: Reports
@@ -27,11 +30,11 @@ namespace TakeoutSystem.Controllers
             try
             {
                 return new OrderStatisticsDTO {
-                    MostSoldItems = _orderStatisticts.GetMostSoldItems(),
-                    AverageServeTimeInSeconds = _orderStatisticts.GetAverageServeTime(),
-                    AverageItemsPerOrder = _orderStatisticts.GetAverageItemsPerOrder(),
-                    CanceledOrdersPercentage = _orderStatisticts.CanceledOrdersPercentage(),
-                    TotalOrders = _orderStatisticts.GetCount()
+                    MostSoldItems = _orderStatisticts.MostSoldItems(new OrderStatisticRequest { }),
+                    AverageServeTimeInSeconds = _orderStatisticts.AverageServeTime(new OrderStatisticRequest { }),
+                    AverageItemsPerOrder = _orderStatisticts.AverageItemsPerOrder(new OrderStatisticRequest { }),
+                    CanceledOrdersPercentage = _orderStatisticts.CanceledOrdersPercentage(new OrderStatisticRequest { }),
+                    TotalOrders = _orderStatisticts.TotalCount(new OrderStatisticRequest { })
                 };
             }
             catch (Exception)
@@ -41,7 +44,7 @@ namespace TakeoutSystem.Controllers
         }
 
         // GET: Orders
-        /*[Route("/Reports/Orders")]
+        [Route("/Reports/Orders")]
         [HttpGet]
         public IActionResult GetExcelReport(String StartDate, String EndDate)
         {
@@ -57,8 +60,7 @@ namespace TakeoutSystem.Controllers
             }
             String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             String fileName = "TakeoutReport_" + startDate.ToString("yyyy-MM-dd") + "_to_" + endDate.ToString("yyyy-MM-dd") + ".xlsx";
-            IOrderReport orderReport = new OrderReportExcel(_context);
-            return File(orderReport.Get(startDate, endDate), contentType, fileName);
-        }*/
+            return File(_orderReport.GetReport(startDate, endDate), contentType, fileName);
+        }
     }
 }

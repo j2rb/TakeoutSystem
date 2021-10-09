@@ -21,31 +21,41 @@ namespace TakeoutSystem.Base
         {
             var query = _context.Orders.AsQueryable();
 
-            if (orderRequest.status != null)
+            if (orderRequest.Status != null)
             {
-                query = query.Where(o => o.Status == orderRequest.status);
+                query = query.Where(o => o.Status == orderRequest.Status);
             }
 
-            if (orderRequest.served == true)
+            if (orderRequest.Served == true)
             {
                 query = query.Where(o => o.ServedAt != null);
             }
 
-            if (orderRequest.onlyPending.GetValueOrDefault() == true)
+            if (orderRequest.StartDate != null)
+            {
+                query = query.Where(o => o.CreatedAt >= orderRequest.StartDate);
+            }
+
+            if (orderRequest.EndDate != null)
+            {
+                query = query.Where(o => o.CreatedAt <= orderRequest.EndDate);
+            }
+
+            if (orderRequest.OnlyPending.GetValueOrDefault() == true)
             {
                 query = query.Where(o => o.ServedAt == null);
             }
 
-            if (orderRequest.page != null)
+            if (orderRequest.Page != null)
             {
                 query = query.Skip(
-                    orderRequest.page.GetValueOrDefault() * orderRequest.pageSize.GetValueOrDefault() - orderRequest.pageSize.GetValueOrDefault()
+                    orderRequest.Page.GetValueOrDefault() * orderRequest.PageSize.GetValueOrDefault() - orderRequest.PageSize.GetValueOrDefault()
                 );
             }
 
-            if (orderRequest.pageSize != null)
+            if (orderRequest.PageSize != null)
             {
-                query = query.Take(orderRequest.pageSize.GetValueOrDefault());
+                query = query.Take(orderRequest.PageSize.GetValueOrDefault());
             }
 
             var orders = query.Select(o => new OrderDetailDTO

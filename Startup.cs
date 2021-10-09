@@ -29,6 +29,7 @@ namespace TakeoutSystem
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IOrderStatistics, OrderStatisticts>();
+            services.AddScoped<IOrderReport, OrderReportExcel>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -4,6 +4,6 @@ namespace TakeoutSystem.Interfaces
 {
     public interface IOrderReport
     {
-        public byte[] Get(DateTime startDate, DateTime endDate);
+        public byte[] GetReport(DateTime startDate, DateTime endDate);
     }
 }

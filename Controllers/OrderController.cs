@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
+using AutoMapper;
 
 namespace TakeoutSystem.Controllers
 {
@@ -13,10 +14,12 @@ namespace TakeoutSystem.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly AutoMapper _autoMapper;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(IOrderService orderService, AutoMapper autoMapper)
         {
             _orderService = orderService;
+            _autoMapper = autoMapper;
         }
 
         // GET: Order
@@ -27,12 +30,16 @@ namespace TakeoutSystem.Controllers
             try
             {
                 var orderRequest = new OrderRequest {
-                    page = Page == null || Page <= 0 ? 1 : Page,
-                    pageSize = PageSize == null || PageSize <= 0 ? 10 : PageSize,
-                    onlyPending = OnlyPending == null ? true : OnlyPending,
-                    status = 1
+                    Page = Page == null || Page <= 0 ? 1 : Page,
+                    PageSize = PageSize == null || PageSize <= 0 ? 10 : PageSize,
+                    OnlyPending = OnlyPending == null ? true : OnlyPending,
+                    Status = 1
                 };
                 var orders = _orderService.GetOrders(orderRequest);
+
+                _autoMapper.Map<Source, Destination>(new Source { Value = 15 });
+
+
                 return orders.Select(o => new OrderSimpleDTO
                 {
                     OrderCode = o.OrderCode,
