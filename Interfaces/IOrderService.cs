@@ -8,12 +8,12 @@ namespace TakeoutSystem.Interfaces
 {
     public interface IOrderService
     {
-        public List<OrderDetailDTO> GetOrders(OrderRequest orderRequest);
-        public OrderDetailDTO GetOrder(String orderCode);
+        public List<OrderDTO> GetOrders(OrderRequest orderRequest);
+        public OrderDTO GetOrder(String orderCode);
         public List<ItemOrderDTO> GetOrderItems(String orderCode);
-        public OrderDetailDTO Create(OrderCreationRequest orderCreationRequest);
-        public OrderDetailDTO Cancel(OrderActionRequest orderCreationRequest);
-        public OrderDetailDTO Serve(OrderActionRequest orderCreationRequest);
+        public OrderDTO Create(OrderCreationRequest orderCreationRequest);
+        public OrderDTO Cancel(OrderActionRequest orderCreationRequest);
+        public OrderDTO Serve(OrderActionRequest orderCreationRequest);
     }
    
     /*

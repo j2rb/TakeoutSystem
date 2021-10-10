@@ -17,7 +17,7 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public List<OrderDetailDTO> GetOrders(OrderRequest orderRequest)
+        public List<OrderDTO> GetOrders(OrderRequest orderRequest)
         {
             var query = _context.Orders.AsQueryable();
 
@@ -58,7 +58,7 @@ namespace TakeoutSystem.Base
                 query = query.Take(orderRequest.PageSize.GetValueOrDefault());
             }
 
-            var orders = query.Select(o => new OrderDetailDTO
+            var orders = query.Select(o => new OrderDTO
             {
                 OrderCode = o.OrderCode,
                 ClientName = o.ClientName,
@@ -76,15 +76,15 @@ namespace TakeoutSystem.Base
             return orders;
         }
 
-        public OrderDetailDTO GetOrder(String orderCode)
+        public OrderDTO GetOrder(String orderCode)
         {
             Order order = _context.Orders.SingleOrDefault(o => o.OrderCode.Equals(orderCode));
             if (order != null)
             {
                 var orderItems = GetOrderItems(orderCode);
                 return _context.Orders
-                    .Where(o => o.OrderCode.Equals(orderCode) && o.Status == 1)
-                    .Select(o => new OrderDetailDTO
+                    .Where(o => o.OrderCode.Equals(orderCode))
+                    .Select(o => new OrderDTO
                     {
                         OrderCode = o.OrderCode,
                         ClientName = o.ClientName,
@@ -122,7 +122,7 @@ namespace TakeoutSystem.Base
                 }).ToList();
         }
 
-        public OrderDetailDTO Create(OrderCreationRequest orderCreationRequest)
+        public OrderDTO Create(OrderCreationRequest orderCreationRequest)
         {
             if (String.IsNullOrEmpty(orderCreationRequest.ClientName))
             {
@@ -189,7 +189,7 @@ namespace TakeoutSystem.Base
             return GetOrder(order.OrderCode);
         }
 
-        public OrderDetailDTO Cancel(OrderActionRequest orderActionRequest)
+        public OrderDTO Cancel(OrderActionRequest orderActionRequest)
         {
             var order = _context.Orders.SingleOrDefault(o => (
                 o.OrderCode.Equals(orderActionRequest.OrderCode) && o.ServedAt == null && o.Status == 1
@@ -214,7 +214,7 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public OrderDetailDTO Serve(OrderActionRequest orderActionRequest)
+        public OrderDTO Serve(OrderActionRequest orderActionRequest)
         {
             var order = _context.Orders.SingleOrDefault(o => (
                    o.OrderCode.Equals(orderActionRequest.OrderCode) && o.ServedAt == null && o.Status == 1

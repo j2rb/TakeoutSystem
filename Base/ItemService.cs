@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
+using TakeoutSystem.DTO;
 using TakeoutSystem.Models;
 
 namespace TakeoutSystem.Base
@@ -12,17 +10,19 @@ namespace TakeoutSystem.Base
     public class ItemService : IItemService
     {
         private readonly TodoContext _context;
-        private readonly IMapper _mapper;
 
-        public ItemService(TodoContext context, IMapper mapper)
+        public ItemService(TodoContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         public List<ItemDTO> GetItems()
         {
-            return _context.Items.ProjectTo<ItemDTO>(_mapper.ConfigurationProvider).ToList();
+            return _context.Items.Select(i => new ItemDTO {
+                ItemId = i.ItemId,
+                Name = i.Name,
+                Price = i.Price
+            }).ToList();
         }
     }
 }

@@ -14,9 +14,9 @@ namespace TakeoutSystem.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderService _orderService;
-        private readonly AutoMapper _autoMapper;
+        private readonly IMapper _autoMapper;
 
-        public OrderController(IOrderService orderService, AutoMapper autoMapper)
+        public OrderController(IOrderService orderService, IMapper autoMapper)
         {
             _orderService = orderService;
             _autoMapper = autoMapper;
@@ -36,16 +36,7 @@ namespace TakeoutSystem.Controllers
                     Status = 1
                 };
                 var orders = _orderService.GetOrders(orderRequest);
-
-                _autoMapper.Map<Source, Destination>(new Source { Value = 15 });
-
-
-                return orders.Select(o => new OrderSimpleDTO
-                {
-                    OrderCode = o.OrderCode,
-                    ClientName = o.ClientName,
-                    Total = o.Total,
-                }).ToList();
+                return _autoMapper.Map<List<OrderSimpleDTO>>(orders);
             }
             catch (Exception)
             {
@@ -57,14 +48,15 @@ namespace TakeoutSystem.Controllers
         // GET: Order/Details
         [Route("/Order/Details")]
         [HttpGet]
-        public ActionResult<OrderDetailDTO> GetOrderDetails(String OrderCode)
+        public ActionResult<OrderDetailsDTO> GetOrderDetails(String OrderCode)
         {
             try
             {
                 var order = _orderService.GetOrder(OrderCode);
                 if (order != null)
                 {
-                    return order;
+                    //return order;
+                    return _autoMapper.Map<OrderDetailsDTO>(order);
                 }
                 else
                 {
@@ -84,7 +76,8 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                return _orderService.Create(orderRequest);
+                var order = _orderService.Create(orderRequest);
+                return _autoMapper.Map<OrderSimpleDTO>(order);
             }
             catch (ArgumentException)
             {
@@ -99,14 +92,14 @@ namespace TakeoutSystem.Controllers
         // POST: Cancel
         [Route("/Order/Cancel")]
         [HttpPost]
-        public ActionResult<OrderDetailDTO> CancelOrder(OrderActionRequest orderActionRequest)
+        public ActionResult<OrderSimpleDTO> CancelOrder(OrderActionRequest orderActionRequest)
         {
             try
             {
                 var order = _orderService.Cancel(orderActionRequest);
                 if (order != null)
                 {
-                    return order;
+                    return _autoMapper.Map<OrderSimpleDTO>(order);
                 }
                 else
                 {
@@ -122,14 +115,14 @@ namespace TakeoutSystem.Controllers
         // POST: Served
         [Route("/Order/Served")]
         [HttpPost]
-        public ActionResult<OrderDetailDTO> ServeOrder(OrderActionRequest orderActionRequest)
+        public ActionResult<OrderSimpleDTO> ServeOrder(OrderActionRequest orderActionRequest)
         {
             try
             {
                 var order = _orderService.Serve(orderActionRequest);
                 if (order != null)
                 {
-                    return order;
+                    return _autoMapper.Map<OrderSimpleDTO>(order);
                 }
                 else
                 {
