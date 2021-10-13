@@ -1,9 +1,10 @@
 ﻿using System;
+using TakeoutSystem.DTO;
 
 namespace TakeoutSystem.Interfaces
 {
     public interface IOrderReport
     {
-        public byte[] GetReport(DateTime startDate, DateTime endDate);
+        public ReportFileDTO GetReport(DateTime startDate, DateTime endDate);
     }
 }

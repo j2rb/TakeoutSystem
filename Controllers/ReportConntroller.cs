@@ -29,11 +29,12 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                return new OrderStatisticsDTO {
+                return new OrderStatisticsDTO
+                {
                     MostSoldItems = _orderStatisticts.MostSoldItems(new OrderStatisticRequest { }),
-                    AverageServeTimeInSeconds = _orderStatisticts.AverageServeTime(new OrderStatisticRequest { }),
-                    AverageItemsPerOrder = _orderStatisticts.AverageItemsPerOrder(new OrderStatisticRequest { }),
-                    CanceledOrdersPercentage = _orderStatisticts.CanceledOrdersPercentage(new OrderStatisticRequest { }),
+                    AverageServeTimeInSeconds = Math.Round(_orderStatisticts.AverageServeTime(new OrderStatisticRequest { }), 2),
+                    AverageItemsPerOrder = Math.Round(_orderStatisticts.AverageItemsPerOrder(new OrderStatisticRequest { }), 2),
+                    CanceledOrdersPercentage = Math.Round(_orderStatisticts.CanceledOrdersPercentage(new OrderStatisticRequest { }), 2),
                     TotalOrders = _orderStatisticts.TotalCount(new OrderStatisticRequest { })
                 };
             }
@@ -58,9 +59,8 @@ namespace TakeoutSystem.Controllers
             {
                 return BadRequest();
             }
-            String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            String fileName = "TakeoutReport_" + startDate.ToString("yyyy-MM-dd") + "_to_" + endDate.ToString("yyyy-MM-dd") + ".xlsx";
-            return File(_orderReport.GetReport(startDate, endDate), contentType, fileName);
+            var report = _orderReport.GetReport(startDate, endDate);
+            return File(report.Data, report.ContentType, report.FileName);
         }
     }
 }

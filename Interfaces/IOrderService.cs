@@ -15,22 +15,4 @@ namespace TakeoutSystem.Interfaces
         public OrderDTO Cancel(OrderActionRequest orderCreationRequest);
         public OrderDTO Serve(OrderActionRequest orderCreationRequest);
     }
-   
-    /*
-    public class StatisticService
-    {
-        private IOrderService _orderService = null;
-
-        public StatisticService(IOrderService orderService)
-        {
-            _orderService = orderService;
-        }
-
-        public int GetOrderCount(OrderRequest orderRequest)
-        {
-           var orders = _orderService.GetOrders(orderRequest);
-           return orders.Count();
-        }
-    }
-    */
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using OfficeOpenXml;
+using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 
@@ -17,8 +18,13 @@ namespace TakeoutSystem.Base
             _orderService = orderService;
         }
 
-        public byte[] GetReport(DateTime startDate, DateTime endDate)
+        public ReportFileDTO GetReport(DateTime startDate, DateTime endDate)
         {
+            var report = new ReportFileDTO
+            {
+                ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                FileName = "TakeoutReport_" + startDate.ToString("yyyy-MM-dd") + "_to_" + endDate.ToString("yyyy-MM-dd") + ".xlsx",
+            };
             using (ExcelPackage package = new ExcelPackage())
             {
                 ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Orders");
@@ -27,7 +33,8 @@ namespace TakeoutSystem.Base
                 worksheet.Cells["B2"].Value = startDate.ToString("MM/dd/yyyy");
                 worksheet.Cells["C2"].Value = endDate.ToString("MM/dd/yyyy");
 
-                var orderStatisticRequest = new OrderStatisticRequest {
+                var orderStatisticRequest = new OrderStatisticRequest
+                {
                     StartDate = startDate,
                     EndDate = endDate
                 };
@@ -49,14 +56,13 @@ namespace TakeoutSystem.Base
                 worksheet.Cells["D8"].Value = _orderStatistics.AverageItemsPerOrder(orderStatisticRequest);
 
                 worksheet.Cells["A9"].Value = "Cancelled Orders";
-                worksheet.Cells["D9"].Value = _orderStatistics.CanceledOrdersCount(orderStatisticRequest) + " ("  + _orderStatistics.CanceledOrdersPercentage(orderStatisticRequest).ToString("0.00") + "%)";
+                worksheet.Cells["D9"].Value = _orderStatistics.CanceledOrdersCount(orderStatisticRequest) + " (" + _orderStatistics.CanceledOrdersPercentage(orderStatisticRequest).ToString("0.00") + "%)";
 
                 worksheet.Cells["A10"].Value = "Average Serve Time";
                 worksheet.Cells["D10"].Value = (_orderStatistics.AverageServeTime(orderStatisticRequest) / 60).ToString("0.00") + " minutes";
 
                 var orders = _orderService.GetOrders(new OrderRequest
                 {
-                    Status = 1,
                     StartDate = startDate,
                     EndDate = endDate
                 });
@@ -70,9 +76,9 @@ namespace TakeoutSystem.Base
                         i.Key.Price,
                         Total = i.Sum(i => i.Quantity),
                         TotalSum = i.Sum(i => i.Quantity * i.Price),
-                        ShareInTotalIncome = i.Sum(i => i.Quantity * i.Price) / totalPriceOrders * 100 
+                        ShareInTotalIncome = i.Sum(i => i.Quantity * i.Price) / totalPriceOrders * 100
                     })
-                    .ToList(); 
+                    .ToList();
                 worksheet.Cells["A12"].Value = "Item Statistics";
                 worksheet.Cells["A12"].Style.Font.Bold = true;
                 worksheet.Cells["A13"].Value = "Id";
@@ -106,7 +112,8 @@ namespace TakeoutSystem.Base
                     worksheet.Cells["C" + position].Value = "$ " + orders[i].Items.Sum(i => i.Price * i.Quantity).ToString("0.00");
                     worksheet.Cells["D" + position++].Value = orders[i].ServedAt == null ? "" : orders[i].ServedAt.GetValueOrDefault().ToString("dd/MM/yy HH:mm");
                 }
-                return package.GetAsByteArray();
+                report.Data = package.GetAsByteArray();
+                return report;
             }
         }
     }
