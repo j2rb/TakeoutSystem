@@ -25,9 +25,9 @@ namespace TakeoutSystem.Controllers
             {
                 return _itemService.GetItems();
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(500);
+                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
             }
         }
     }

@@ -126,36 +126,36 @@ namespace TakeoutSystem.Base
         {
             if (String.IsNullOrEmpty(orderCreationRequest.ClientName))
             {
-                throw new ArgumentException();
+                throw new ArgumentException("Client name is empty");
             }
             if (orderCreationRequest.Items == null || orderCreationRequest.Items.Count == 0)
             {
-                throw new ArgumentException();
+                throw new ArgumentException("There are no items in the order");
             }
             else
             {
                 IEnumerable<int> duplicates = orderCreationRequest.Items.GroupBy(i => i.ItemId).Where(i => i.Count() > 1).Select(i => i.Key);
                 if (duplicates.Count() > 0)
                 {
-                    throw new ArgumentException();
+                    throw new ArgumentException("There are duplicated items");
                 }
                 for (var x = 0; x < orderCreationRequest.Items.Count; x++)
                 {
                     if (orderCreationRequest.Items[x].ItemId <= 0)
                     {
-                        throw new ArgumentException();
+                        throw new ArgumentException(String.Format("[{0}] Item Id is empty or it must be > 0", x));
                     }
                     else
                     {
                         Item item = _context.Items.SingleOrDefault(i => i.ItemId == orderCreationRequest.Items[x].ItemId);
                         if (item == null)
                         {
-                            throw new ArgumentException();
+                            throw new ArgumentException(String.Format("[{0}] Item Id not found", x));
                         }
                     }
                     if (orderCreationRequest.Items[x].Quantity <= 0)
                     {
-                        throw new ArgumentException();
+                        throw new ArgumentException(String.Format("[{0}] Item quantity must be > 0", x));
                     }
                 }
             }

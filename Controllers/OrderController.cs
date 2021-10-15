@@ -29,7 +29,8 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                var orderRequest = new OrderRequest {
+                var orderRequest = new OrderRequest
+                {
                     Page = Page == null || Page <= 0 ? 1 : Page,
                     PageSize = PageSize == null || PageSize <= 0 ? 10 : PageSize,
                     OnlyPending = OnlyPending == null ? true : OnlyPending,
@@ -38,9 +39,9 @@ namespace TakeoutSystem.Controllers
                 var orders = _orderService.GetOrders(orderRequest);
                 return _autoMapper.Map<List<OrderSimpleDTO>>(orders);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(500);
+                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
             }
         }
 
@@ -60,12 +61,12 @@ namespace TakeoutSystem.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return NotFound(new ErrorResponseDTO { message = "Order not found" });
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(500);
+                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
             }
         }
 
@@ -79,13 +80,13 @@ namespace TakeoutSystem.Controllers
                 var order = _orderService.Create(orderRequest);
                 return _autoMapper.Map<OrderSimpleDTO>(order);
             }
-            catch (ArgumentException)
+            catch (ArgumentException e)
             {
-                return BadRequest();
+                return BadRequest(new ErrorResponseDTO { message = e.Message });
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(500);
+                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
             }
         }
 
@@ -103,12 +104,12 @@ namespace TakeoutSystem.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return NotFound(new ErrorResponseDTO { message = "Order not found" });
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(500);
+                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
             }
         }
 
@@ -126,12 +127,12 @@ namespace TakeoutSystem.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return NotFound(new ErrorResponseDTO { message = "Order not found" });
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(500);
+                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
             }
         }
     }

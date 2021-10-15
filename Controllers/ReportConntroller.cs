@@ -38,9 +38,9 @@ namespace TakeoutSystem.Controllers
                     TotalOrders = _orderStatisticts.TotalCount(new OrderStatisticRequest { })
                 };
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return StatusCode(500);
+                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
             }
         }
 
@@ -51,13 +51,17 @@ namespace TakeoutSystem.Controllers
         {
             DateTime startDate;
             DateTime endDate;
-            if (!DateTime.TryParse(StartDate, out startDate) || !DateTime.TryParse(EndDate, out endDate))
+            if (!DateTime.TryParse(StartDate, out startDate))
             {
-                return BadRequest();
+                return BadRequest(new ErrorResponseDTO { message = "Invalid start date" });
+            }
+            else if (!DateTime.TryParse(EndDate, out endDate))
+            {
+                return BadRequest(new ErrorResponseDTO { message = "Invalid end date" });
             }
             else if (startDate >= endDate)
             {
-                return BadRequest();
+                return BadRequest(new ErrorResponseDTO { message = "Start date must be greater than end date" });
             }
             var report = _orderReport.GetReport(startDate, endDate);
             return File(report.Data, report.ContentType, report.FileName);
