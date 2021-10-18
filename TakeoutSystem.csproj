@@ -20,6 +20,7 @@
     <None Remove="Interfaces\" />
     <None Remove="EPPlus" />
     <None Remove="Mappers\" />
+    <None Remove="Microsoft.EntityFrameworkCore.InMemory" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
@@ -42,5 +43,6 @@
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="EPPlus" Version="5.7.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.9" />
   </ItemGroup>
 </Project>

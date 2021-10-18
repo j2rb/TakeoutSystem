@@ -71,7 +71,7 @@ namespace TakeoutSystem.Base
             {
                 var orderItems = GetOrderItems(orders[i].OrderCode);
                 orders[i].Items = orderItems;
-                orders[i].Total = orders[i].Items.Count();
+                orders[i].Total = orders[i].Items.Sum(i => i.Quantity);
             }
             return orders;
         }
