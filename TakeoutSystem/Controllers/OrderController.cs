@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
@@ -27,22 +26,15 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public ActionResult<List<OrderSimpleDTO>> GetOrder(int? Page, int? PageSize, bool? OnlyPending)
         {
-            try
+            var orderRequest = new OrderRequest
             {
-                var orderRequest = new OrderRequest
-                {
-                    Page = Page == null || Page <= 0 ? 1 : Page,
-                    PageSize = PageSize == null || PageSize <= 0 ? 10 : PageSize,
-                    OnlyPending = OnlyPending == null ? true : OnlyPending,
-                    Status = 1
-                };
-                var orders = _orderService.GetOrders(orderRequest);
-                return _autoMapper.Map<List<OrderSimpleDTO>>(orders);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
-            }
+                Page = Page == null || Page <= 0 ? 1 : Page,
+                PageSize = PageSize == null || PageSize <= 0 ? 10 : PageSize,
+                OnlyPending = OnlyPending == null ? true : OnlyPending,
+                Status = 1
+            };
+            var orders = _orderService.GetOrders(orderRequest);
+            return _autoMapper.Map<List<OrderSimpleDTO>>(orders);
         }
 
 
@@ -51,22 +43,15 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public ActionResult<OrderDetailsDTO> GetOrderDetails(String OrderCode)
         {
-            try
+            var order = _orderService.GetOrder(OrderCode);
+            if (order != null)
             {
-                var order = _orderService.GetOrder(OrderCode);
-                if (order != null)
-                {
-                    //return order;
-                    return _autoMapper.Map<OrderDetailsDTO>(order);
-                }
-                else
-                {
-                    return NotFound(new ErrorResponseDTO { message = "Order not found" });
-                }
+                //return order;
+                return _autoMapper.Map<OrderDetailsDTO>(order);
             }
-            catch (Exception e)
+            else
             {
-                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
+                return Problem(title: "Order not found", detail: "Order not found with code sent", statusCode: 404);
             }
         }
 
@@ -82,11 +67,7 @@ namespace TakeoutSystem.Controllers
             }
             catch (ArgumentException e)
             {
-                return BadRequest(new ErrorResponseDTO { message = e.Message });
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
+                return Problem(title: "Wrong argument in request", detail: e.Message, statusCode: 400);
             }
         }
 
@@ -95,21 +76,14 @@ namespace TakeoutSystem.Controllers
         [HttpPost]
         public ActionResult<OrderSimpleDTO> CancelOrder(OrderActionRequest orderActionRequest)
         {
-            try
+            var order = _orderService.Cancel(orderActionRequest);
+            if (order != null)
             {
-                var order = _orderService.Cancel(orderActionRequest);
-                if (order != null)
-                {
-                    return _autoMapper.Map<OrderSimpleDTO>(order);
-                }
-                else
-                {
-                    return NotFound(new ErrorResponseDTO { message = "Order not found" });
-                }
+                return _autoMapper.Map<OrderSimpleDTO>(order);
             }
-            catch (Exception e)
+            else
             {
-                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
+                return Problem(title: "Order not found", detail: "Order not found with code sent", statusCode: 404);
             }
         }
 
@@ -118,21 +92,14 @@ namespace TakeoutSystem.Controllers
         [HttpPost]
         public ActionResult<OrderSimpleDTO> ServeOrder(OrderActionRequest orderActionRequest)
         {
-            try
+            var order = _orderService.Serve(orderActionRequest);
+            if (order != null)
             {
-                var order = _orderService.Serve(orderActionRequest);
-                if (order != null)
-                {
-                    return _autoMapper.Map<OrderSimpleDTO>(order);
-                }
-                else
-                {
-                    return NotFound(new ErrorResponseDTO { message = "Order not found" });
-                }
+                return _autoMapper.Map<OrderSimpleDTO>(order);
             }
-            catch (Exception e)
+            else
             {
-                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
+                return Problem(title: "Order not found", detail: "Order not found with code sent", statusCode: 404);
             }
         }
     }

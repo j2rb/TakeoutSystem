@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
-using System;
 
 namespace TakeoutSystem.Controllers
 {
@@ -21,14 +20,7 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public ActionResult<List<ItemDTO>> GetItems()
         {
-            try
-            {
-                return _itemService.GetItems();
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
-            }
+           return _itemService.GetItems();
         }
     }
 }

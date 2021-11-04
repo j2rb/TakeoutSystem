@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using TakeoutSystem.Base;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
@@ -27,21 +26,14 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public ActionResult<OrderStatisticsDTO> Get()
         {
-            try
+            return new OrderStatisticsDTO
             {
-                return new OrderStatisticsDTO
-                {
-                    MostSoldItems = _orderStatisticts.MostSoldItems(new OrderStatisticRequest { }),
-                    AverageServeTimeInSeconds = Math.Round(_orderStatisticts.AverageServeTime(new OrderStatisticRequest { }), 2),
-                    AverageItemsPerOrder = Math.Round(_orderStatisticts.AverageItemsPerOrder(new OrderStatisticRequest { }), 2),
-                    CanceledOrdersPercentage = Math.Round(_orderStatisticts.CanceledOrdersPercentage(new OrderStatisticRequest { }), 2),
-                    TotalOrders = _orderStatisticts.TotalCount(new OrderStatisticRequest { })
-                };
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, new ErrorResponseDTO { message = e.Message });
-            }
+                MostSoldItems = _orderStatisticts.MostSoldItems(new OrderStatisticRequest { }),
+                AverageServeTimeInSeconds = Math.Round(_orderStatisticts.AverageServeTime(new OrderStatisticRequest { }), 2),
+                AverageItemsPerOrder = Math.Round(_orderStatisticts.AverageItemsPerOrder(new OrderStatisticRequest { }), 2),
+                CanceledOrdersPercentage = Math.Round(_orderStatisticts.CanceledOrdersPercentage(new OrderStatisticRequest { }), 2),
+                TotalOrders = _orderStatisticts.TotalCount(new OrderStatisticRequest { })
+            };
         }
 
         // GET: Orders
@@ -53,15 +45,15 @@ namespace TakeoutSystem.Controllers
             DateTime endDate;
             if (!DateTime.TryParse(StartDate, out startDate))
             {
-                return BadRequest(new ErrorResponseDTO { message = "Invalid start date" });
+                return Problem(title: "Wrong argument in request", detail: "Invalid start date", statusCode: 400);
             }
             else if (!DateTime.TryParse(EndDate, out endDate))
             {
-                return BadRequest(new ErrorResponseDTO { message = "Invalid end date" });
+                return Problem(title: "Wrong argument in request", detail: "Invalid end date", statusCode: 400);
             }
             else if (startDate >= endDate)
             {
-                return BadRequest(new ErrorResponseDTO { message = "Start date must be greater than end date" });
+                return Problem(title: "Wrong argument in request", detail: "Start date must be greater than end date", statusCode: 400);
             }
             var report = _orderReport.GetReport(startDate, endDate);
             return File(report.Data, report.ContentType, report.FileName);
