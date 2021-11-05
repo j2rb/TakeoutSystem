@@ -26,13 +26,14 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public ActionResult<OrderStatisticsDTO> Get()
         {
+            var orderStatisticRequest = new OrderStatisticRequest { };
             return new OrderStatisticsDTO
             {
-                MostSoldItems = _orderStatisticts.MostSoldItems(new OrderStatisticRequest { }),
-                AverageServeTimeInSeconds = Math.Round(_orderStatisticts.AverageServeTime(new OrderStatisticRequest { }), 2),
-                AverageItemsPerOrder = Math.Round(_orderStatisticts.AverageItemsPerOrder(new OrderStatisticRequest { }), 2),
-                CanceledOrdersPercentage = Math.Round(_orderStatisticts.CanceledOrdersPercentage(new OrderStatisticRequest { }), 2),
-                TotalOrders = _orderStatisticts.TotalCount(new OrderStatisticRequest { })
+                MostSoldItems = _orderStatisticts.MostSoldItems(orderStatisticRequest),
+                AverageServeTimeInSeconds = _orderStatisticts.AverageServeTime(orderStatisticRequest),
+                AverageItemsPerOrder = _orderStatisticts.AverageItemsPerOrder(orderStatisticRequest),
+                CanceledOrdersPercentage = _orderStatisticts.CanceledOrdersPercentage(orderStatisticRequest),
+                TotalOrders = _orderStatisticts.TotalCount(orderStatisticRequest)
             };
         }
 

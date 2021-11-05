@@ -35,7 +35,7 @@ namespace TakeoutSystem.Base
                     StartDate = orderStatisticRequest.StartDate,
                     EndDate = orderStatisticRequest.EndDate
                 });
-                return (decimal)allOrders.Count(o => o.Status == 0) / allOrders.Count() * 100;
+                return Math.Round((decimal)allOrders.Count(o => o.Status == 0) / allOrders.Count() * 100, 2);
             }
             catch (DivideByZeroException)
             {
@@ -52,7 +52,7 @@ namespace TakeoutSystem.Base
             });
             try
             {
-                return (decimal)orders.Sum(o => o.Items.Sum(i => i.Quantity)) / orders.Count();
+                return Math.Round((decimal)orders.Sum(o => o.Items.Sum(i => i.Quantity)) / orders.Count(), 2);
             }
             catch (DivideByZeroException)
             {
@@ -71,7 +71,7 @@ namespace TakeoutSystem.Base
                     StartDate = orderStatisticRequest.StartDate,
                     EndDate = orderStatisticRequest.EndDate
                 });
-                return (decimal)servedOrders.Sum(o => (o.ServedAt.GetValueOrDefault() - o.CreatedAt).TotalSeconds) / servedOrders.Count();
+                return Math.Round((decimal)servedOrders.Sum(o => (o.ServedAt.GetValueOrDefault() - o.CreatedAt).TotalSeconds) / servedOrders.Count(), 2);
             }
             catch (DivideByZeroException)
             {
@@ -108,17 +108,24 @@ namespace TakeoutSystem.Base
                 StartDate = orderStatisticRequest.StartDate,
                 EndDate = orderStatisticRequest.EndDate
             });
-            return (decimal)orders.Sum(o => o.Items.Sum(i => i.Price * i.Quantity));
+            return Math.Round((decimal)orders.Sum(o => o.Items.Sum(i => i.Price * i.Quantity)), 2);
         }
 
         public decimal AveragePriceOrders(OrderStatisticRequest orderStatisticRequest)
         {
-            var orders = _orderService.GetOrders(new OrderRequest
+            try
             {
-                StartDate = orderStatisticRequest.StartDate,
-                EndDate = orderStatisticRequest.EndDate
-            });
-            return (decimal)orders.Sum(o => o.Items.Sum(i => i.Price * i.Quantity)) / orders.Count();
+                var orders = _orderService.GetOrders(new OrderRequest
+                {
+                    StartDate = orderStatisticRequest.StartDate,
+                    EndDate = orderStatisticRequest.EndDate
+                });
+                return Math.Round((decimal)orders.Sum(o => o.Items.Sum(i => i.Price * i.Quantity)) / orders.Count(), 2);
+            }
+            catch (DivideByZeroException)
+            {
+                return 0;
+            }
         }
     }
 }
