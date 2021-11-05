@@ -105,20 +105,16 @@ namespace TakeoutSystem.Base
         public List<ItemOrderDTO> GetOrderItems(String orderCode)
         {
             return _context.OrderItems
-                .Join(
-                    _context.Items, oi => oi.ItemId, i => i.ItemId, (orderItem, item) => new { orderItem, item }
-                )
-                .Join(
-                    _context.Orders, oi => oi.orderItem.OrderId, o => o.OrderId, (orderItem, order) => new { orderItem.orderItem, orderItem.item, order }
-                )
-                .Where(oi => String.IsNullOrEmpty(orderCode) ? true : oi.order.OrderCode.Equals(orderCode))
+                .Include(oi => oi.Item)
+                .Include(oi => oi.Order)
+                .Where(oi => String.IsNullOrEmpty(orderCode) ? true : oi.Order.OrderCode.Equals(orderCode))
                 .Select(oi => new ItemOrderDTO
                 {
-                    ItemId = oi.item.ItemId,
-                    Name = oi.item.Name,
-                    Price = oi.item.Price,
-                    Quantity = oi.orderItem.Quantity,
-                    Total = (oi.orderItem.Quantity * oi.item.Price)
+                    ItemId = oi.Item.ItemId,
+                    Name = oi.Item.Name,
+                    Price = oi.Item.Price,
+                    Quantity = oi.Quantity,
+                    Total = (oi.Quantity * oi.Item.Price)
                 }).ToList();
         }
 
