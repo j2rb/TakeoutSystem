@@ -28,9 +28,9 @@ namespace TakeoutSystem.Controllers
         {
             var orderRequest = new OrderRequest
             {
-                Page = Page == null || Page <= 0 ? 1 : Page,
-                PageSize = PageSize == null || PageSize <= 0 ? 10 : PageSize,
-                OnlyPending = OnlyPending == null ? true : OnlyPending,
+                Page = Page.GetValueOrDefault(1),
+                PageSize = PageSize.GetValueOrDefault(10),
+                OnlyPending = OnlyPending.GetValueOrDefault(true),
                 Status = 1
             };
             var orders = _orderService.GetOrders(orderRequest);
@@ -46,7 +46,6 @@ namespace TakeoutSystem.Controllers
             var order = _orderService.GetOrder(OrderCode);
             if (order != null)
             {
-                //return order;
                 return _autoMapper.Map<OrderDetailsDTO>(order);
             }
             else
