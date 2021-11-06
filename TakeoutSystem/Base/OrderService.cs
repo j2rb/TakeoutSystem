@@ -66,7 +66,7 @@ namespace TakeoutSystem.Base
                 ServedAt = o.ServedAt,
                 Status = o.Status
             })
-                .ToList();                
+                .ToList();
             for (var i = 0; i < orders.Count; i++)
             {
                 var orderItems = GetOrderItems(orders[i].OrderCode);
@@ -164,23 +164,16 @@ namespace TakeoutSystem.Base
                 Status = 1
             };
             _context.Orders.Add(order);
-            try
+            _context.SaveChanges();
+            for (var i = 0; i < orderCreationRequest.Items.Count; i++)
             {
-                _context.SaveChanges();
-                for (var i = 0; i < orderCreationRequest.Items.Count; i++)
+                _context.OrderItems.Add(new OrderItem
                 {
-                    _context.OrderItems.Add(new OrderItem
-                    {
-                        OrderId = order.OrderId,
-                        ItemId = orderCreationRequest.Items[i].ItemId,
-                        Quantity = orderCreationRequest.Items[i].Quantity
-                    });
-                    _context.SaveChanges();
-                }
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                throw new DbUpdateConcurrencyException();
+                    OrderId = order.OrderId,
+                    ItemId = orderCreationRequest.Items[i].ItemId,
+                    Quantity = orderCreationRequest.Items[i].Quantity
+                });
+                _context.SaveChanges();
             }
             return GetOrder(order.OrderCode);
         }
@@ -194,14 +187,7 @@ namespace TakeoutSystem.Base
             {
                 order.Status = 0;
                 _context.Entry(order).State = EntityState.Modified;
-                try
-                {
-                    _context.SaveChanges();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    throw new DbUpdateConcurrencyException();
-                }
+                _context.SaveChanges();
                 return GetOrder(orderActionRequest.OrderCode);
             }
             else
@@ -219,14 +205,7 @@ namespace TakeoutSystem.Base
             {
                 order.ServedAt = DateTime.Now;
                 _context.Entry(order).State = EntityState.Modified;
-                try
-                {
-                    _context.SaveChanges();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    throw new DbUpdateConcurrencyException();
-                }
+                _context.SaveChanges();
                 return GetOrder(orderActionRequest.OrderCode);
             }
             else
