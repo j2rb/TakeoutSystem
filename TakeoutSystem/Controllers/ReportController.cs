@@ -42,20 +42,6 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public IActionResult GetExcelReport(DateTime StartDate, DateTime EndDate)
         {
-            /*DateTime startDate;
-            DateTime endDate;
-            if (!DateTime.TryParse(StartDate, out startDate))
-            {
-                return Problem(title: "Wrong argument in request", detail: "Invalid start date", statusCode: 400);
-            }
-            else if (!DateTime.TryParse(EndDate, out endDate))
-            {
-                return Problem(title: "Wrong argument in request", detail: "Invalid end date", statusCode: 400);
-            }
-            else if (startDate >= endDate)
-            {
-                return Problem(title: "Wrong argument in request", detail: "Start date must be greater than end date", statusCode: 400);
-            }*/
             var report = _orderReport.GetReport(StartDate, EndDate);
             return File(report.Data, report.ContentType, report.FileName);
         }
