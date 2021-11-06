@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml;
 using TakeoutSystem.DTO;
@@ -27,11 +29,14 @@ namespace TakeoutSystem.Base
             };
             using (ExcelPackage package = new ExcelPackage())
             {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Orders");
-                worksheet.Cells["A1"].Value = "Takeout system report";
-                worksheet.Cells["A2"].Value = "For period from";
-                worksheet.Cells["B2"].Value = startDate.ToString("MM/dd/yyyy");
-                worksheet.Cells["C2"].Value = endDate.ToString("MM/dd/yyyy");
+                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Order Statistics");
+                int row = 1, column = 1;
+                worksheet.Cells[row, column].Value = "Takeout system report";
+
+                row += 1;
+                worksheet.Cells[row, column++].Value = "For period from";
+                worksheet.Cells[row, column++].Value = startDate.ToString("MM/dd/yyyy");
+                worksheet.Cells[row++, column++].Value = endDate.ToString("MM/dd/yyyy");
 
                 var orderStatisticRequest = new OrderStatisticRequest
                 {
@@ -39,27 +44,23 @@ namespace TakeoutSystem.Base
                     EndDate = endDate
                 };
 
-                worksheet.Cells["A4"].Value = "Summary";
-                worksheet.Cells["A4"].Style.Font.Bold = true;
-                worksheet.Cells["A5"].Value = "Total Orders";
-                worksheet.Cells["D5"].Value = _orderStatistics.TotalCount(orderStatisticRequest);
-
-                worksheet.Cells["A6"].Value = "Total Sum";
+                Dictionary<String, String> data = new Dictionary<String, String>();
+                data.Add("Summary", "");
+                data.Add("Total Orders", _orderStatistics.TotalCount(orderStatisticRequest).ToString());
                 var totalPriceOrders = _orderStatistics.TotalPriceOrders(orderStatisticRequest);
-                worksheet.Cells["D6"].Value = "$ " + totalPriceOrders.ToString("0.00");
+                data.Add("Total Sum", "$ " + totalPriceOrders);
+                data.Add("Average Order Price", "$ " + _orderStatistics.AveragePriceOrders(orderStatisticRequest));
+                data.Add("Average Items Per Order", _orderStatistics.AverageItemsPerOrder(orderStatisticRequest).ToString());
+                data.Add("Cancelled Orders", _orderStatistics.CanceledOrdersCount(orderStatisticRequest) + " (" + _orderStatistics.CanceledOrdersPercentage(orderStatisticRequest).ToString("0.00") + "%)");
+                data.Add("Average Serve Time", (_orderStatistics.AverageServeTime(orderStatisticRequest) / 60).ToString("0.00") + " minutes");
 
-                worksheet.Cells["A7"].Value = "Average Order Price";
-                worksheet.Cells["D7"].Value = "$ " + _orderStatistics.AveragePriceOrders(orderStatisticRequest).ToString("0.00");
-
-                worksheet.Cells["A8"].Value = "Average Items Per Order";
-                worksheet.Cells["D8"].Style.Numberformat.Format = "0.00";
-                worksheet.Cells["D8"].Value = _orderStatistics.AverageItemsPerOrder(orderStatisticRequest);
-
-                worksheet.Cells["A9"].Value = "Cancelled Orders";
-                worksheet.Cells["D9"].Value = _orderStatistics.CanceledOrdersCount(orderStatisticRequest) + " (" + _orderStatistics.CanceledOrdersPercentage(orderStatisticRequest).ToString("0.00") + "%)";
-
-                worksheet.Cells["A10"].Value = "Average Serve Time";
-                worksheet.Cells["D10"].Value = (_orderStatistics.AverageServeTime(orderStatisticRequest) / 60).ToString("0.00") + " minutes";
+                row++;
+                foreach (var item in data)
+                {
+                    column = 1;
+                    worksheet.Cells[row, column++].Value = item.Key;
+                    worksheet.Cells[row++, column++].Value = data[item.Key];
+                }
 
                 var orders = _orderService.GetOrders(new OrderRequest
                 {
@@ -75,42 +76,45 @@ namespace TakeoutSystem.Base
                         i.Key.Name,
                         i.Key.Price,
                         Total = i.Sum(i => i.Quantity),
-                        TotalSum = i.Sum(i => i.Quantity * i.Price),
-                        ShareInTotalIncome = i.Sum(i => i.Quantity * i.Price) / totalPriceOrders * 100
+                        TotalSum = i.Sum(i => i.Quantity * i.Price).ToString("0.00"),
+                        ShareInTotalIncome = (i.Sum(i => i.Quantity * i.Price) / totalPriceOrders * 100).ToString("0.00") + "%"
                     })
                     .ToList();
-                worksheet.Cells["A12"].Value = "Item Statistics";
-                worksheet.Cells["A12"].Style.Font.Bold = true;
-                worksheet.Cells["A13"].Value = "Id";
-                worksheet.Cells["B13"].Value = "Name";
-                worksheet.Cells["C13"].Value = "Price";
-                worksheet.Cells["D13"].Value = "Sold Quantity";
-                worksheet.Cells["E13"].Value = "Sold Total Sum";
-                worksheet.Cells["F13"].Value = "Share in Total Income";
-                int position = 14;
+
+                row++;
+                column = 1;
+                worksheet.Cells[row++, column].Value = "Item Statistics";
+                worksheet.Cells[row, column++].Value = "Id";
+                worksheet.Cells[row, column++].Value = "Name";
+                worksheet.Cells[row, column++].Value = "Price";
+                worksheet.Cells[row, column++].Value = "Sold Quantity";
+                worksheet.Cells[row, column++].Value = "Sold Total Sum";
+                worksheet.Cells[row++, column].Value = "Share in Total Income";
                 for (var i = 0; i < items.Count; i++)
                 {
-                    worksheet.Cells["A" + position].Value = items[i].ItemId;
-                    worksheet.Cells["B" + position].Value = items[i].Name;
-                    worksheet.Cells["C" + position].Value = items[i].Price;
-                    worksheet.Cells["D" + position].Value = items[i].Total;
-                    worksheet.Cells["E" + position].Value = items[i].TotalSum.ToString("0.00");
-                    worksheet.Cells["F" + position++].Value = items[i].ShareInTotalIncome.ToString("0.00") + "%";
+                    column = 1;
+                    worksheet.Cells[row, column++].Value = items[i].ItemId;
+                    worksheet.Cells[row, column++].Value = items[i].Name;
+                    worksheet.Cells[row, column++].Value = items[i].Price;
+                    worksheet.Cells[row, column++].Value = items[i].Total;
+                    worksheet.Cells[row, column++].Value = items[i].TotalSum;
+                    worksheet.Cells[row++, column].Value = items[i].ShareInTotalIncome;
                 }
 
-                position += 2;
-                worksheet.Cells["A" + position].Value = "Order Statistics";
-                worksheet.Cells["A" + position++].Style.Font.Bold = true;
-                worksheet.Cells["A" + position].Value = "Created";
-                worksheet.Cells["B" + position].Value = "Item Count";
-                worksheet.Cells["C" + position].Value = "Total Amount";
-                worksheet.Cells["D" + position++].Value = "Finished";
+                row++;
+                column = 1;
+                worksheet.Cells[row++, column].Value = "Order Statistics";
+                worksheet.Cells[row, column++].Value = "Created";
+                worksheet.Cells[row, column++].Value = "Item Count";
+                worksheet.Cells[row, column++].Value = "Total Amount";
+                worksheet.Cells[row++, column].Value = "Finished";
                 for (var i = 0; i < orders.Count; i++)
                 {
-                    worksheet.Cells["A" + position].Value = orders[i].CreatedAt.ToString("dd/MM/yy HH:mm");
-                    worksheet.Cells["B" + position].Value = orders[i].Items.Sum(i => i.Quantity);
-                    worksheet.Cells["C" + position].Value = "$ " + orders[i].Items.Sum(i => i.Price * i.Quantity).ToString("0.00");
-                    worksheet.Cells["D" + position++].Value = orders[i].ServedAt == null ? "" : orders[i].ServedAt.GetValueOrDefault().ToString("dd/MM/yy HH:mm");
+                    column = 1;
+                    worksheet.Cells[row, column++].Value = orders[i].CreatedAt.ToString("dd/MM/yy HH:mm");
+                    worksheet.Cells[row, column++].Value = orders[i].Items.Sum(i => i.Quantity);
+                    worksheet.Cells[row, column++].Value = "$ " + orders[i].Items.Sum(i => i.Price * i.Quantity).ToString("0.00");
+                    worksheet.Cells[row++, column].Value = orders[i].ServedAt == null ? "" : orders[i].ServedAt.GetValueOrDefault().ToString("dd/MM/yy HH:mm");
                 }
                 report.Data = package.GetAsByteArray();
                 return report;
