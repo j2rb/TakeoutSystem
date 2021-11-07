@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
@@ -18,9 +19,9 @@ namespace TakeoutSystem.Controllers
         // GET: MenuItem
         [Route("/MenuItem")]
         [HttpGet]
-        public ActionResult<List<ItemDTO>> GetItems()
+        public async Task<List<ItemDTO>> GetItemsAsync()
         {
-           return _itemService.GetItems();
+           return await _itemService.GetItems();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using OfficeOpenXml;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
@@ -20,7 +21,7 @@ namespace TakeoutSystem.Base
             _orderService = orderService;
         }
 
-        public ReportFileDTO GetReport(DateTime startDate, DateTime endDate)
+        public async Task<ReportFileDTO> GetReport(DateTime startDate, DateTime endDate)
         {
             var report = new ReportFileDTO
             {
@@ -46,13 +47,13 @@ namespace TakeoutSystem.Base
 
                 Dictionary<String, String> data = new Dictionary<String, String>();
                 data.Add("Summary", "");
-                data.Add("Total Orders", _orderStatistics.TotalCount(orderStatisticRequest).ToString());
-                var totalPriceOrders = _orderStatistics.TotalPriceOrders(orderStatisticRequest);
+                data.Add("Total Orders", (await _orderStatistics.TotalCount(orderStatisticRequest)).ToString());
+                var totalPriceOrders = await _orderStatistics.TotalPriceOrders(orderStatisticRequest);
                 data.Add("Total Sum", "$ " + totalPriceOrders);
-                data.Add("Average Order Price", "$ " + _orderStatistics.AveragePriceOrders(orderStatisticRequest));
-                data.Add("Average Items Per Order", _orderStatistics.AverageItemsPerOrder(orderStatisticRequest).ToString());
-                data.Add("Cancelled Orders", _orderStatistics.CanceledOrdersCount(orderStatisticRequest) + " (" + _orderStatistics.CanceledOrdersPercentage(orderStatisticRequest).ToString("0.00") + "%)");
-                data.Add("Average Serve Time", (_orderStatistics.AverageServeTime(orderStatisticRequest) / 60).ToString("0.00") + " minutes");
+                data.Add("Average Order Price", "$ " + await _orderStatistics.AveragePriceOrders(orderStatisticRequest));
+                data.Add("Average Items Per Order", (await _orderStatistics.AverageItemsPerOrder(orderStatisticRequest)).ToString());
+                data.Add("Cancelled Orders", await _orderStatistics.CanceledOrdersCount(orderStatisticRequest) + " (" + (await _orderStatistics.CanceledOrdersPercentage(orderStatisticRequest)).ToString("0.00") + "%)");
+                data.Add("Average Serve Time", (await _orderStatistics.AverageServeTime(orderStatisticRequest) / 60).ToString("0.00") + " minutes");
 
                 row++;
                 foreach (var item in data)
@@ -62,7 +63,7 @@ namespace TakeoutSystem.Base
                     worksheet.Cells[row++, column++].Value = data[item.Key];
                 }
 
-                var orders = _orderService.GetOrders(new OrderRequest
+                var orders = await _orderService.GetOrders(new OrderRequest
                 {
                     StartDate = startDate,
                     EndDate = endDate

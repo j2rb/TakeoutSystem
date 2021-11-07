@@ -4,6 +4,8 @@ using System.Linq;
 using TakeoutSystem.Interfaces;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace TakeoutSystem.Base
 {
@@ -16,13 +18,13 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public List<ItemDTO> GetItems()
+        public async Task<List<ItemDTO>> GetItems()
         {
-            return _context.Items.Select(i => new ItemDTO {
+            return await _context.Items.Select(i => new ItemDTO {
                 ItemId = i.ItemId,
                 Name = i.Name,
                 Price = i.Price
-            }).ToList();
+            }).ToListAsync();
         }
     }
 }

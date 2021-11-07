@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
@@ -24,25 +25,25 @@ namespace TakeoutSystem.Controllers
         // GET: Reports
         [Route("/Reports/Statistics")]
         [HttpGet]
-        public ActionResult<OrderStatisticsDTO> Get()
+        public async Task<ActionResult<OrderStatisticsDTO>> Get()
         {
             var orderStatisticRequest = new OrderStatisticRequest { };
             return new OrderStatisticsDTO
             {
-                MostSoldItems = _orderStatisticts.MostSoldItems(orderStatisticRequest),
-                AverageServeTimeInSeconds = _orderStatisticts.AverageServeTime(orderStatisticRequest),
-                AverageItemsPerOrder = _orderStatisticts.AverageItemsPerOrder(orderStatisticRequest),
-                CanceledOrdersPercentage = _orderStatisticts.CanceledOrdersPercentage(orderStatisticRequest),
-                TotalOrders = _orderStatisticts.TotalCount(orderStatisticRequest)
+                MostSoldItems = await _orderStatisticts.MostSoldItems(orderStatisticRequest),
+                AverageServeTimeInSeconds = await _orderStatisticts.AverageServeTime(orderStatisticRequest),
+                AverageItemsPerOrder = await _orderStatisticts.AverageItemsPerOrder(orderStatisticRequest),
+                CanceledOrdersPercentage = await _orderStatisticts.CanceledOrdersPercentage(orderStatisticRequest),
+                TotalOrders = await _orderStatisticts.TotalCount(orderStatisticRequest)
             };
         }
 
         // GET: Orders
         [Route("/Reports/Orders")]
         [HttpGet]
-        public IActionResult GetExcelReport(DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetExcelReport(DateTime StartDate, DateTime EndDate)
         {
-            var report = _orderReport.GetReport(StartDate, EndDate);
+            var report = await _orderReport.GetReport(StartDate, EndDate);
             return File(report.Data, report.ContentType, report.FileName);
         }
     }

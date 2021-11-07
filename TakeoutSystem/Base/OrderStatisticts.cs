@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
@@ -16,21 +17,22 @@ namespace TakeoutSystem.Base
             _orderService = orderService;
         }
 
-        public int CanceledOrdersCount(OrderStatisticRequest orderStatisticRequest)
+        public async Task<int> CanceledOrdersCount(OrderStatisticRequest orderStatisticRequest)
         {
-            return _orderService.GetOrders(new OrderRequest
+            var orders = await _orderService.GetOrders(new OrderRequest
             {
                 Status = 0,
                 StartDate = orderStatisticRequest.StartDate,
                 EndDate = orderStatisticRequest.EndDate
-            }).Count();
+            });
+            return orders.Count();
         }
 
-        public decimal CanceledOrdersPercentage(OrderStatisticRequest orderStatisticRequest)
+        public async Task<decimal> CanceledOrdersPercentage(OrderStatisticRequest orderStatisticRequest)
         {
             try
             {
-                var allOrders = _orderService.GetOrders(new OrderRequest
+                var allOrders = await _orderService.GetOrders(new OrderRequest
                 {
                     StartDate = orderStatisticRequest.StartDate,
                     EndDate = orderStatisticRequest.EndDate
@@ -43,9 +45,9 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public decimal AverageItemsPerOrder(OrderStatisticRequest orderStatisticRequest)
+        public async Task<decimal> AverageItemsPerOrder(OrderStatisticRequest orderStatisticRequest)
         {
-            var orders = _orderService.GetOrders(new OrderRequest
+            var orders = await _orderService.GetOrders(new OrderRequest
             {
                 StartDate = orderStatisticRequest.StartDate,
                 EndDate = orderStatisticRequest.EndDate
@@ -60,11 +62,11 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public decimal AverageServeTime(OrderStatisticRequest orderStatisticRequest)
+        public async Task<decimal> AverageServeTime(OrderStatisticRequest orderStatisticRequest)
         {
             try
             {
-                var servedOrders = _orderService.GetOrders(new OrderRequest
+                var servedOrders = await _orderService.GetOrders(new OrderRequest
                 {
                     Status = 1,
                     Served = true,
@@ -79,19 +81,20 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public int TotalCount(OrderStatisticRequest orderStatisticRequest)
+        public async Task<int> TotalCount(OrderStatisticRequest orderStatisticRequest)
         {
-            return _orderService.GetOrders(new OrderRequest
+            var orders = await _orderService.GetOrders(new OrderRequest
             {
                 StartDate = orderStatisticRequest.StartDate,
                 EndDate = orderStatisticRequest.EndDate,
-            }).Count();
+            });
+            return orders.Count();
         }
 
-        public List<ItemSimpleDTO> MostSoldItems(OrderStatisticRequest orderStatisticRequest)
+        public async Task<List<ItemSimpleDTO>> MostSoldItems(OrderStatisticRequest orderStatisticRequest)
         {
-            return _orderService.GetOrderItems(null)
-                .GroupBy(i => new { i.ItemId, i.Name })
+            var orders = await _orderService.GetOrderItems(null);
+            return orders.GroupBy(i => new { i.ItemId, i.Name })
                 .OrderByDescending(i => i.Sum(i => i.Quantity))
                 .Take(2)
                 .Select(oi => new ItemSimpleDTO
@@ -101,9 +104,9 @@ namespace TakeoutSystem.Base
                 }).ToList();
         }
 
-        public decimal TotalPriceOrders(OrderStatisticRequest orderStatisticRequest)
+        public async Task<decimal> TotalPriceOrders(OrderStatisticRequest orderStatisticRequest)
         {
-            var orders = _orderService.GetOrders(new OrderRequest
+            var orders = await _orderService.GetOrders(new OrderRequest
             {
                 StartDate = orderStatisticRequest.StartDate,
                 EndDate = orderStatisticRequest.EndDate
@@ -111,11 +114,11 @@ namespace TakeoutSystem.Base
             return Math.Round((decimal)orders.Sum(o => o.Items.Sum(i => i.Price * i.Quantity)), 2);
         }
 
-        public decimal AveragePriceOrders(OrderStatisticRequest orderStatisticRequest)
+        public async Task<decimal> AveragePriceOrders(OrderStatisticRequest orderStatisticRequest)
         {
             try
             {
-                var orders = _orderService.GetOrders(new OrderRequest
+                var orders = await _orderService.GetOrders(new OrderRequest
                 {
                     StartDate = orderStatisticRequest.StartDate,
                     EndDate = orderStatisticRequest.EndDate

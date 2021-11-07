@@ -5,6 +5,7 @@ using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
 using TakeoutSystem.Models;
 using AutoMapper;
+using System.Threading.Tasks;
 
 namespace TakeoutSystem.Controllers
 {
@@ -24,7 +25,7 @@ namespace TakeoutSystem.Controllers
         // GET: Order
         [Route("/Order")]
         [HttpGet]
-        public ActionResult<List<OrderSimpleDTO>> GetOrder(int? Page, int? PageSize, bool? OnlyPending)
+        public async Task<ActionResult<List<OrderSimpleDTO>>> GetOrder(int? Page, int? PageSize, bool? OnlyPending)
         {
             var orderRequest = new OrderRequest
             {
@@ -33,7 +34,7 @@ namespace TakeoutSystem.Controllers
                 OnlyPending = OnlyPending.GetValueOrDefault(true),
                 Status = 1
             };
-            var orders = _orderService.GetOrders(orderRequest);
+            var orders = await _orderService.GetOrders(orderRequest);
             return _autoMapper.Map<List<OrderSimpleDTO>>(orders);
         }
 
@@ -41,9 +42,9 @@ namespace TakeoutSystem.Controllers
         // GET: Order/Details
         [Route("/Order/Details")]
         [HttpGet]
-        public ActionResult<OrderDetailsDTO> GetOrderDetails(String OrderCode)
+        public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(String OrderCode)
         {
-            var order = _orderService.GetOrder(OrderCode);
+            var order = await _orderService.GetOrder(OrderCode);
             if (order != null)
             {
                 return _autoMapper.Map<OrderDetailsDTO>(order);
@@ -57,11 +58,11 @@ namespace TakeoutSystem.Controllers
         // POST: Create
         [Route("/Order")]
         [HttpPost]
-        public ActionResult<OrderSimpleDTO> CreateOrder(OrderCreationRequest orderRequest)
+        public async Task<ActionResult<OrderSimpleDTO>> CreateOrder(OrderCreationRequest orderRequest)
         {
             try
             {
-                var order = _orderService.Create(orderRequest);
+                var order = await _orderService.Create(orderRequest);
                 return _autoMapper.Map<OrderSimpleDTO>(order);
             }
             catch (ArgumentException e)
@@ -73,9 +74,9 @@ namespace TakeoutSystem.Controllers
         // POST: Cancel
         [Route("/Order/Cancel")]
         [HttpPost]
-        public ActionResult<OrderSimpleDTO> CancelOrder(OrderActionRequest orderActionRequest)
+        public async Task<ActionResult<OrderSimpleDTO>> CancelOrder(OrderActionRequest orderActionRequest)
         {
-            var order = _orderService.Cancel(orderActionRequest);
+            var order = await _orderService.Cancel(orderActionRequest);
             if (order != null)
             {
                 return _autoMapper.Map<OrderSimpleDTO>(order);
@@ -89,9 +90,9 @@ namespace TakeoutSystem.Controllers
         // POST: Served
         [Route("/Order/Served")]
         [HttpPost]
-        public ActionResult<OrderSimpleDTO> ServeOrder(OrderActionRequest orderActionRequest)
+        public async Task<ActionResult<OrderSimpleDTO>> ServeOrder(OrderActionRequest orderActionRequest)
         {
-            var order = _orderService.Serve(orderActionRequest);
+            var order = await _orderService.Serve(orderActionRequest);
             if (order != null)
             {
                 return _autoMapper.Map<OrderSimpleDTO>(order);

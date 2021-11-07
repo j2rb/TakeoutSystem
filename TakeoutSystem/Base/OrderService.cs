@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TakeoutSystem.DTO;
 using TakeoutSystem.Interfaces;
@@ -17,7 +18,7 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public List<OrderDTO> GetOrders(OrderRequest orderRequest)
+        public async Task<List<OrderDTO>> GetOrders(OrderRequest orderRequest)
         {
             var query = _context.Orders.AsQueryable();
 
@@ -58,7 +59,7 @@ namespace TakeoutSystem.Base
                 query = query.Take(orderRequest.PageSize.GetValueOrDefault());
             }
 
-            var orders = query.Select(o => new OrderDTO
+            var orders = await query.Select(o => new OrderDTO
             {
                 OrderCode = o.OrderCode,
                 ClientName = o.ClientName,
@@ -66,23 +67,23 @@ namespace TakeoutSystem.Base
                 ServedAt = o.ServedAt,
                 Status = o.Status
             })
-                .ToList();
+                .ToListAsync();
             for (var i = 0; i < orders.Count; i++)
             {
-                var orderItems = GetOrderItems(orders[i].OrderCode);
+                var orderItems = await GetOrderItems(orders[i].OrderCode);
                 orders[i].Items = orderItems;
                 orders[i].Total = orders[i].Items.Sum(i => i.Quantity);
             }
             return orders;
         }
 
-        public OrderDTO GetOrder(String orderCode)
+        public async Task<OrderDTO> GetOrder(String orderCode)
         {
             Order order = _context.Orders.SingleOrDefault(o => o.OrderCode.Equals(orderCode));
             if (order != null)
             {
-                var orderItems = GetOrderItems(orderCode);
-                return _context.Orders
+                var orderItems = await GetOrderItems(orderCode);
+                var result = await _context.Orders
                     .Where(o => o.OrderCode.Equals(orderCode))
                     .Select(o => new OrderDTO
                     {
@@ -94,7 +95,8 @@ namespace TakeoutSystem.Base
                         Total = orderItems.Count(),
                         Items = orderItems
                     })
-                    .ToList().First();
+                    .ToListAsync();
+                return result.First();
             }
             else
             {
@@ -102,9 +104,9 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public List<ItemOrderDTO> GetOrderItems(String orderCode)
+        public async Task<List<ItemOrderDTO>> GetOrderItems(String orderCode)
         {
-            return _context.OrderItems
+            return await _context.OrderItems
                 .Include(oi => oi.Item)
                 .Include(oi => oi.Order)
                 .Where(oi => String.IsNullOrEmpty(orderCode) ? true : oi.Order.OrderCode.Equals(orderCode))
@@ -115,10 +117,10 @@ namespace TakeoutSystem.Base
                     Price = oi.Item.Price,
                     Quantity = oi.Quantity,
                     Total = (oi.Quantity * oi.Item.Price)
-                }).ToList();
+                }).ToListAsync();
         }
 
-        public OrderDTO Create(OrderCreationRequest orderCreationRequest)
+        public async Task<OrderDTO> Create(OrderCreationRequest orderCreationRequest)
         {
             if (String.IsNullOrEmpty(orderCreationRequest.ClientName))
             {
@@ -143,7 +145,7 @@ namespace TakeoutSystem.Base
                     }
                     else
                     {
-                        Item item = _context.Items.SingleOrDefault(i => i.ItemId == orderCreationRequest.Items[x].ItemId);
+                        Item item = await _context.Items.SingleOrDefaultAsync(i => i.ItemId == orderCreationRequest.Items[x].ItemId);
                         if (item == null)
                         {
                             throw new ArgumentException(String.Format("[{0}] Item Id not found", x));
@@ -164,7 +166,7 @@ namespace TakeoutSystem.Base
                 Status = 1
             };
             _context.Orders.Add(order);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             for (var i = 0; i < orderCreationRequest.Items.Count; i++)
             {
                 _context.OrderItems.Add(new OrderItem
@@ -173,22 +175,22 @@ namespace TakeoutSystem.Base
                     ItemId = orderCreationRequest.Items[i].ItemId,
                     Quantity = orderCreationRequest.Items[i].Quantity
                 });
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
-            return GetOrder(order.OrderCode);
+            return await GetOrder(order.OrderCode);
         }
 
-        public OrderDTO Cancel(OrderActionRequest orderActionRequest)
+        public async Task<OrderDTO> Cancel(OrderActionRequest orderActionRequest)
         {
-            var order = _context.Orders.SingleOrDefault(o => (
+            var order = await _context.Orders.SingleOrDefaultAsync(o => (
                 o.OrderCode.Equals(orderActionRequest.OrderCode) && o.ServedAt == null && o.Status == 1
             ));
             if (order != null)
             {
                 order.Status = 0;
                 _context.Entry(order).State = EntityState.Modified;
-                _context.SaveChanges();
-                return GetOrder(orderActionRequest.OrderCode);
+                await _context.SaveChangesAsync();
+                return await GetOrder(orderActionRequest.OrderCode);
             }
             else
             {
@@ -196,17 +198,17 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public OrderDTO Serve(OrderActionRequest orderActionRequest)
+        public async Task<OrderDTO> Serve(OrderActionRequest orderActionRequest)
         {
-            var order = _context.Orders.SingleOrDefault(o => (
+            var order = await _context.Orders.SingleOrDefaultAsync(o => (
                    o.OrderCode.Equals(orderActionRequest.OrderCode) && o.ServedAt == null && o.Status == 1
                ));
             if (order != null)
             {
                 order.ServedAt = DateTime.Now;
                 _context.Entry(order).State = EntityState.Modified;
-                _context.SaveChanges();
-                return GetOrder(orderActionRequest.OrderCode);
+                await _context.SaveChangesAsync();
+                return await GetOrder(orderActionRequest.OrderCode);
             }
             else
             {
