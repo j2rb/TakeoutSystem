@@ -18,7 +18,7 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public async Task<List<ItemDTO>> GetItems()
+        public async Task<List<ItemDTO>> GetItemsAsync()
         {
             return await _context.Items.Select(i => new ItemDTO {
                 ItemId = i.ItemId,

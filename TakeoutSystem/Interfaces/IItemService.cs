@@ -7,6 +7,6 @@ namespace TakeoutSystem.Interfaces
 {
     public interface IItemService
     {
-        public Task<List<ItemDTO>> GetItems();
+        public Task<List<ItemDTO>> GetItemsAsync();
     }
 }

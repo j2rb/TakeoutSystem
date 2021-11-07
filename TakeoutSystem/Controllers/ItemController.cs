@@ -21,7 +21,7 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public async Task<List<ItemDTO>> GetItemsAsync()
         {
-           return await _itemService.GetItems();
+           return await _itemService.GetItemsAsync();
         }
     }
 }

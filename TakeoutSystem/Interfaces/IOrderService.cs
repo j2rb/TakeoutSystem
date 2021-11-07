@@ -9,11 +9,11 @@ namespace TakeoutSystem.Interfaces
 {
     public interface IOrderService
     {
-        public Task<List<OrderDTO>> GetOrders(OrderRequest orderRequest);
-        public Task<OrderDTO> GetOrder(String orderCode);
-        public Task<List<ItemOrderDTO>> GetOrderItems(String orderCode);
-        public Task<OrderDTO> Create(OrderCreationRequest orderCreationRequest);
-        public Task<OrderDTO> Cancel(OrderActionRequest orderCreationRequest);
-        public Task<OrderDTO> Serve(OrderActionRequest orderCreationRequest);
+        public Task<List<OrderDTO>> GetOrdersAsync(OrderRequest orderRequest);
+        public Task<OrderDTO> GetOrderAsync(String orderCode);
+        public Task<List<ItemOrderDTO>> GetOrderItemsAsync(String orderCode);
+        public Task<OrderDTO> CreateAsync(OrderCreationRequest orderCreationRequest);
+        public Task<OrderDTO> CancelAsync(OrderActionRequest orderCreationRequest);
+        public Task<OrderDTO> ServeAsync(OrderActionRequest orderCreationRequest);
     }
 }

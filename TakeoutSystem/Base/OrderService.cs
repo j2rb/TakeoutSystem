@@ -18,7 +18,7 @@ namespace TakeoutSystem.Base
             _context = context;
         }
 
-        public async Task<List<OrderDTO>> GetOrders(OrderRequest orderRequest)
+        public async Task<List<OrderDTO>> GetOrdersAsync(OrderRequest orderRequest)
         {
             var query = _context.Orders.AsQueryable();
 
@@ -70,19 +70,19 @@ namespace TakeoutSystem.Base
                 .ToListAsync();
             for (var i = 0; i < orders.Count; i++)
             {
-                var orderItems = await GetOrderItems(orders[i].OrderCode);
+                var orderItems = await GetOrderItemsAsync(orders[i].OrderCode);
                 orders[i].Items = orderItems;
                 orders[i].Total = orders[i].Items.Sum(i => i.Quantity);
             }
             return orders;
         }
 
-        public async Task<OrderDTO> GetOrder(String orderCode)
+        public async Task<OrderDTO> GetOrderAsync(String orderCode)
         {
             Order order = _context.Orders.SingleOrDefault(o => o.OrderCode.Equals(orderCode));
             if (order != null)
             {
-                var orderItems = await GetOrderItems(orderCode);
+                var orderItems = await GetOrderItemsAsync(orderCode);
                 var result = await _context.Orders
                     .Where(o => o.OrderCode.Equals(orderCode))
                     .Select(o => new OrderDTO
@@ -104,7 +104,7 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public async Task<List<ItemOrderDTO>> GetOrderItems(String orderCode)
+        public async Task<List<ItemOrderDTO>> GetOrderItemsAsync(String orderCode)
         {
             return await _context.OrderItems
                 .Include(oi => oi.Item)
@@ -120,7 +120,7 @@ namespace TakeoutSystem.Base
                 }).ToListAsync();
         }
 
-        public async Task<OrderDTO> Create(OrderCreationRequest orderCreationRequest)
+        public async Task<OrderDTO> CreateAsync(OrderCreationRequest orderCreationRequest)
         {
             if (String.IsNullOrEmpty(orderCreationRequest.ClientName))
             {
@@ -177,10 +177,10 @@ namespace TakeoutSystem.Base
                 });
                 await _context.SaveChangesAsync();
             }
-            return await GetOrder(order.OrderCode);
+            return await GetOrderAsync(order.OrderCode);
         }
 
-        public async Task<OrderDTO> Cancel(OrderActionRequest orderActionRequest)
+        public async Task<OrderDTO> CancelAsync(OrderActionRequest orderActionRequest)
         {
             var order = await _context.Orders.SingleOrDefaultAsync(o => (
                 o.OrderCode.Equals(orderActionRequest.OrderCode) && o.ServedAt == null && o.Status == 1
@@ -190,7 +190,7 @@ namespace TakeoutSystem.Base
                 order.Status = 0;
                 _context.Entry(order).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                return await GetOrder(orderActionRequest.OrderCode);
+                return await GetOrderAsync(orderActionRequest.OrderCode);
             }
             else
             {
@@ -198,7 +198,7 @@ namespace TakeoutSystem.Base
             }
         }
 
-        public async Task<OrderDTO> Serve(OrderActionRequest orderActionRequest)
+        public async Task<OrderDTO> ServeAsync(OrderActionRequest orderActionRequest)
         {
             var order = await _context.Orders.SingleOrDefaultAsync(o => (
                    o.OrderCode.Equals(orderActionRequest.OrderCode) && o.ServedAt == null && o.Status == 1
@@ -208,7 +208,7 @@ namespace TakeoutSystem.Base
                 order.ServedAt = DateTime.Now;
                 _context.Entry(order).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                return await GetOrder(orderActionRequest.OrderCode);
+                return await GetOrderAsync(orderActionRequest.OrderCode);
             }
             else
             {

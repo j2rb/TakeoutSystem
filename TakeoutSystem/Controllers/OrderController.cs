@@ -34,7 +34,7 @@ namespace TakeoutSystem.Controllers
                 OnlyPending = OnlyPending.GetValueOrDefault(true),
                 Status = 1
             };
-            var orders = await _orderService.GetOrders(orderRequest);
+            var orders = await _orderService.GetOrdersAsync(orderRequest);
             return _autoMapper.Map<List<OrderSimpleDTO>>(orders);
         }
 
@@ -44,7 +44,7 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(String OrderCode)
         {
-            var order = await _orderService.GetOrder(OrderCode);
+            var order = await _orderService.GetOrderAsync(OrderCode);
             if (order != null)
             {
                 return _autoMapper.Map<OrderDetailsDTO>(order);
@@ -62,7 +62,7 @@ namespace TakeoutSystem.Controllers
         {
             try
             {
-                var order = await _orderService.Create(orderRequest);
+                var order = await _orderService.CreateAsync(orderRequest);
                 return _autoMapper.Map<OrderSimpleDTO>(order);
             }
             catch (ArgumentException e)
@@ -76,7 +76,7 @@ namespace TakeoutSystem.Controllers
         [HttpPost]
         public async Task<ActionResult<OrderSimpleDTO>> CancelOrder(OrderActionRequest orderActionRequest)
         {
-            var order = await _orderService.Cancel(orderActionRequest);
+            var order = await _orderService.CancelAsync(orderActionRequest);
             if (order != null)
             {
                 return _autoMapper.Map<OrderSimpleDTO>(order);
@@ -92,7 +92,7 @@ namespace TakeoutSystem.Controllers
         [HttpPost]
         public async Task<ActionResult<OrderSimpleDTO>> ServeOrder(OrderActionRequest orderActionRequest)
         {
-            var order = await _orderService.Serve(orderActionRequest);
+            var order = await _orderService.ServeAsync(orderActionRequest);
             if (order != null)
             {
                 return _autoMapper.Map<OrderSimpleDTO>(order);

@@ -30,11 +30,11 @@ namespace TakeoutSystem.Controllers
             var orderStatisticRequest = new OrderStatisticRequest { };
             return new OrderStatisticsDTO
             {
-                MostSoldItems = await _orderStatisticts.MostSoldItems(orderStatisticRequest),
-                AverageServeTimeInSeconds = await _orderStatisticts.AverageServeTime(orderStatisticRequest),
-                AverageItemsPerOrder = await _orderStatisticts.AverageItemsPerOrder(orderStatisticRequest),
-                CanceledOrdersPercentage = await _orderStatisticts.CanceledOrdersPercentage(orderStatisticRequest),
-                TotalOrders = await _orderStatisticts.TotalCount(orderStatisticRequest)
+                MostSoldItems = await _orderStatisticts.MostSoldItemsAsync(orderStatisticRequest),
+                AverageServeTimeInSeconds = await _orderStatisticts.AverageServeTimeAsync(orderStatisticRequest),
+                AverageItemsPerOrder = await _orderStatisticts.AverageItemsPerOrderAsync(orderStatisticRequest),
+                CanceledOrdersPercentage = await _orderStatisticts.CanceledOrdersPercentageAsync(orderStatisticRequest),
+                TotalOrders = await _orderStatisticts.TotalCountAsync(orderStatisticRequest)
             };
         }
 
@@ -43,7 +43,7 @@ namespace TakeoutSystem.Controllers
         [HttpGet]
         public async Task<IActionResult> GetExcelReport(DateTime StartDate, DateTime EndDate)
         {
-            var report = await _orderReport.GetReport(StartDate, EndDate);
+            var report = await _orderReport.GetReportAsync(StartDate, EndDate);
             return File(report.Data, report.ContentType, report.FileName);
         }
     }

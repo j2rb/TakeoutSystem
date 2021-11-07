@@ -44,7 +44,7 @@ namespace TakeoutSystem.Tests
         public async Task GetItemTest()
         {
             IItemService itemService = new ItemService(_context);
-            var items = await itemService.GetItems();
+            var items = await itemService.GetItemsAsync();
 
             Assert.That(items.Count() == 3);
             CollectionAssert.AllItemsAreUnique(items);

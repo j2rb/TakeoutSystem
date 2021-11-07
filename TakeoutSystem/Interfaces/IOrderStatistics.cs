@@ -8,13 +8,13 @@ namespace TakeoutSystem.Interfaces
 {
     public interface IOrderStatistics
     {
-        public Task<List<ItemSimpleDTO>> MostSoldItems(OrderStatisticRequest orderStatisticRequest);
-        public Task<decimal> AverageServeTime(OrderStatisticRequest orderStatisticRequest);
-        public Task<decimal> AverageItemsPerOrder(OrderStatisticRequest orderStatisticRequest);
-        public Task<decimal> CanceledOrdersPercentage(OrderStatisticRequest orderStatisticRequest);
-        public Task<int> CanceledOrdersCount(OrderStatisticRequest orderStatisticRequest);
-        public Task<int> TotalCount(OrderStatisticRequest orderStatisticRequest);
-        public Task<decimal> TotalPriceOrders(OrderStatisticRequest orderStatisticRequest);
-        public Task<decimal> AveragePriceOrders(OrderStatisticRequest orderStatisticRequest);
+        public Task<List<ItemSimpleDTO>> MostSoldItemsAsync(OrderStatisticRequest orderStatisticRequest);
+        public Task<decimal> AverageServeTimeAsync(OrderStatisticRequest orderStatisticRequest);
+        public Task<decimal> AverageItemsPerOrderAsync(OrderStatisticRequest orderStatisticRequest);
+        public Task<decimal> CanceledOrdersPercentageAsync(OrderStatisticRequest orderStatisticRequest);
+        public Task<int> CanceledOrdersCountAsync(OrderStatisticRequest orderStatisticRequest);
+        public Task<int> TotalCountAsync(OrderStatisticRequest orderStatisticRequest);
+        public Task<decimal> TotalPriceOrdersAsync(OrderStatisticRequest orderStatisticRequest);
+        public Task<decimal> AveragePriceOrdersAsync(OrderStatisticRequest orderStatisticRequest);
     }
 }

@@ -6,6 +6,6 @@ namespace TakeoutSystem.Interfaces
 {
     public interface IOrderReport
     {
-        public Task<ReportFileDTO> GetReport(DateTime startDate, DateTime endDate);
+        public Task<ReportFileDTO> GetReportAsync(DateTime startDate, DateTime endDate);
     }
 }

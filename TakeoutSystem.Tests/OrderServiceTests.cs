@@ -131,7 +131,7 @@ namespace TakeoutSystem.Tests
             orderCreationRequest.Items.Add(new OrderItemCreationRequest { ItemId = 100, Quantity = 3 });
 
             IOrderService orderService = new OrderService(_context);
-            var order = await orderService.Create(orderCreationRequest);
+            var order = await orderService.CreateAsync(orderCreationRequest);
 
             Assert.That(order.ClientName == orderCreationRequest.ClientName);
             Assert.That(String.IsNullOrEmpty(order.OrderCode) == false);
@@ -153,7 +153,7 @@ namespace TakeoutSystem.Tests
             var items = 2;
 
             IOrderService orderService = new OrderService(_context);
-            var order = await orderService.GetOrder(orderCode);
+            var order = await orderService.GetOrderAsync(orderCode);
 
             Assert.That(order.OrderCode == orderCode);
             Assert.That(order.ClientName == clientName);
@@ -170,7 +170,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = await orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrdersAsync(orderActionRequest);
 
             for (var x = 0; x < orders.Count(); x++)
             {
@@ -188,7 +188,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = await orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrdersAsync(orderActionRequest);
 
             for (var x = 0; x < orders.Count(); x++)
             {
@@ -208,7 +208,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = await orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrdersAsync(orderActionRequest);
 
             for (var x = 0; x < orders.Count(); x++)
             {
@@ -228,7 +228,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = await orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrdersAsync(orderActionRequest);
 
             Assert.That(orders.Count() == 2);
         }
@@ -242,7 +242,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = await orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrdersAsync(orderActionRequest);
 
             for (var x = 0; x < orders.Count(); x++)
             {
@@ -258,7 +258,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var order = await orderService.Serve(orderActionRequest);
+            var order = await orderService.ServeAsync(orderActionRequest);
 
             Assert.That(order.OrderCode == orderActionRequest.OrderCode);
             Assert.That(order.ServedAt != null);
@@ -274,7 +274,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var order = await orderService.Cancel(orderActionRequest);
+            var order = await orderService.CancelAsync(orderActionRequest);
 
             Assert.That(order.OrderCode == orderActionRequest.OrderCode);
             Assert.That(order.ServedAt == null);
