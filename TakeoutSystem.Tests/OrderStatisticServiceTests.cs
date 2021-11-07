@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using TakeoutSystem.Base;
@@ -14,24 +14,24 @@ namespace TakeoutSystem.Tests
     public class OrderStatisticServiceTests
     {
         [Test]
-        public void CanceledOrdersCountTest()
+        public async Task CanceledOrdersCountTest()
         {
             var orderService = new Mock<IOrderService>();
             var orders = new List<OrderDTO>();
             orders.Add(new OrderDTO { ClientName = "CLIENT-001", OrderCode = "ORDER-CODE-001", Status = 0, Total = 1, CreatedAt = DateTime.Now });
             orders.Add(new OrderDTO { ClientName = "CLIENT-002", OrderCode = "ORDER-CODE-002", Status = 0, Total = 1, CreatedAt = DateTime.Now });
             orders.Add(new OrderDTO { ClientName = "CLIENT-003", OrderCode = "ORDER-CODE-003", Status = 0, Total = 1, CreatedAt = DateTime.Now });
-            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(orders);
+            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(Task.FromResult(orders));
             var orderStatisticRequest = new OrderStatisticRequest();
 
             IOrderStatistics orderStatistics = new OrderStatisticts(orderService.Object);
-            var cancelledOrdersCount = orderStatistics.CanceledOrdersCount(orderStatisticRequest);
+            var cancelledOrdersCount = await orderStatistics.CanceledOrdersCount(orderStatisticRequest);
 
             Assert.That(cancelledOrdersCount == 3);
         }
 
         [Test]
-        public void CanceledOrdersPercentageTest()
+        public async Task CanceledOrdersPercentageTest()
         {
             var orderService = new Mock<IOrderService>();
             var orders = new List<OrderDTO>();
@@ -39,17 +39,17 @@ namespace TakeoutSystem.Tests
             orders.Add(new OrderDTO { ClientName = "CLIENT-002", OrderCode = "ORDER-CODE-002", Status = 0, Total = 1, CreatedAt = DateTime.Now });
             orders.Add(new OrderDTO { ClientName = "CLIENT-003", OrderCode = "ORDER-CODE-003", Status = 1, Total = 1, CreatedAt = DateTime.Now });
             orders.Add(new OrderDTO { ClientName = "CLIENT-004", OrderCode = "ORDER-CODE-004", Status = 1, Total = 1, CreatedAt = DateTime.Now });
-            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(orders);
+            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(Task.FromResult(orders));
             var orderStatisticRequest = new OrderStatisticRequest();
 
             IOrderStatistics orderStatistics = new OrderStatisticts(orderService.Object);
-            var canceledOrdersPercentage = orderStatistics.CanceledOrdersPercentage(orderStatisticRequest);
+            var canceledOrdersPercentage = await orderStatistics.CanceledOrdersPercentage(orderStatisticRequest);
 
             Assert.That(canceledOrdersPercentage == 25.0m);
         }
 
         [Test]
-        public void AverageItemsPerOrderTest()
+        public async Task AverageItemsPerOrderTest()
         {
             var orderService = new Mock<IOrderService>();
             var orders = new List<OrderDTO>();
@@ -80,17 +80,17 @@ namespace TakeoutSystem.Tests
                     new ItemOrderDTO { ItemId = 1, Price = 1.5m, Quantity = 3 }
                 }
             });
-            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(orders);
+            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(Task.FromResult(orders));
             var orderStatisticRequest = new OrderStatisticRequest();
 
             IOrderStatistics orderStatistics = new OrderStatisticts(orderService.Object);
-            var averageItemsPerOrder = orderStatistics.AverageItemsPerOrder(orderStatisticRequest);
+            var averageItemsPerOrder = await orderStatistics.AverageItemsPerOrder(orderStatisticRequest);
 
             Assert.That(averageItemsPerOrder == 5m);
         }
 
         [Test]
-        public void AverageServeTimeTest()
+        public async Task AverageServeTimeTest()
         {
             var orderService = new Mock<IOrderService>();
             var orders = new List<OrderDTO>();
@@ -99,17 +99,17 @@ namespace TakeoutSystem.Tests
             orders.Add(new OrderDTO { ClientName = "CLIENT-003", OrderCode = "ORDER-CODE-003", Status = 1, Total = 1, CreatedAt = Convert.ToDateTime("2021-12-02 16:25:00"), ServedAt = Convert.ToDateTime("2021-12-02 16:30:05") });
             orders.Add(new OrderDTO { ClientName = "CLIENT-004", OrderCode = "ORDER-CODE-004", Status = 1, Total = 1, CreatedAt = Convert.ToDateTime("2021-12-02 17:57:00"), ServedAt = Convert.ToDateTime("2021-12-02 18:15:21") });
             orders.Add(new OrderDTO { ClientName = "CLIENT-005", OrderCode = "ORDER-CODE-005", Status = 1, Total = 1, CreatedAt = Convert.ToDateTime("2021-12-03 11:55:03"), ServedAt = Convert.ToDateTime("2021-12-03 12:05:43") });
-            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(orders);
+            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(Task.FromResult(orders));
             var orderStatisticRequest = new OrderStatisticRequest();
 
             IOrderStatistics orderStatistics = new OrderStatisticts(orderService.Object);
-            var averageServeTime = orderStatistics.AverageServeTime(orderStatisticRequest);
+            var averageServeTime = await orderStatistics.AverageServeTime(orderStatisticRequest);
 
             Assert.That(averageServeTime == 563m);
         }
 
         [Test]
-        public void TotalCountTest()
+        public async Task TotalCountTest()
         {
             var orderService = new Mock<IOrderService>();
             var orders = new List<OrderDTO>();
@@ -117,17 +117,17 @@ namespace TakeoutSystem.Tests
             orders.Add(new OrderDTO { ClientName = "CLIENT-002", OrderCode = "ORDER-CODE-002", Status = 1, Total = 1, CreatedAt = DateTime.Now });
             orders.Add(new OrderDTO { ClientName = "CLIENT-003", OrderCode = "ORDER-CODE-003", Status = 0, Total = 1, CreatedAt = DateTime.Now });
             orders.Add(new OrderDTO { ClientName = "CLIENT-004", OrderCode = "ORDER-CODE-004", Status = 0, Total = 1, CreatedAt = DateTime.Now });
-            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(orders);
+            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(Task.FromResult(orders));
             var orderStatisticRequest = new OrderStatisticRequest();
 
             IOrderStatistics orderStatistics = new OrderStatisticts(orderService.Object);
-            var totalCount = orderStatistics.TotalCount(orderStatisticRequest);
+            var totalCount = await orderStatistics.TotalCount(orderStatisticRequest);
 
             Assert.That(totalCount == 4);
         }
 
         [Test]
-        public void MostSoldItemsTest()
+        public async Task MostSoldItemsTest()
         {
             var orderService = new Mock<IOrderService>();
             var orderItems = new List<ItemOrderDTO>();
@@ -139,11 +139,11 @@ namespace TakeoutSystem.Tests
             orderItems.Add(new ItemOrderDTO { ItemId = 3, Name = "ITEM-003", Price = 2.50m, Quantity = 1, Total = 1 * 2.50m });
             orderItems.Add(new ItemOrderDTO { ItemId = 3, Name = "ITEM-003", Price = 2.50m, Quantity = 4, Total = 4 * 2.50m });
             orderItems.Add(new ItemOrderDTO { ItemId = 3, Name = "ITEM-003", Price = 2.50m, Quantity = 3, Total = 1 * 2.50m });
-            orderService.Setup(o => o.GetOrderItems(null)).Returns(orderItems);
+            orderService.Setup(o => o.GetOrderItems(null)).Returns(Task.FromResult(orderItems));
             var orderStatisticRequest = new OrderStatisticRequest();
 
             IOrderStatistics orderStatistics = new OrderStatisticts(orderService.Object);
-            var mostSoldItems = orderStatistics.MostSoldItems(orderStatisticRequest);
+            var mostSoldItems = await orderStatistics.MostSoldItems(orderStatisticRequest);
 
             Assert.That(mostSoldItems.Count() == 2);
             Assert.That(mostSoldItems[0].ItemId == 3);
@@ -153,7 +153,7 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void TotalPriceOrdersTest()
+        public async Task TotalPriceOrdersTest()
         {
             var orderService = new Mock<IOrderService>();
             var orders = new List<OrderDTO>();
@@ -184,17 +184,17 @@ namespace TakeoutSystem.Tests
                     new ItemOrderDTO { ItemId = 1, Price = 1.5m, Quantity = 3 }
                 }
             });
-            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(orders);
+            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(Task.FromResult(orders));
             var orderStatisticRequest = new OrderStatisticRequest();
 
             IOrderStatistics orderStatistics = new OrderStatisticts(orderService.Object);
-            var totalPriceOrders = orderStatistics.TotalPriceOrders(orderStatisticRequest);
+            var totalPriceOrders = await orderStatistics.TotalPriceOrders(orderStatisticRequest);
 
             Assert.That(totalPriceOrders == 25.5m);
         }
 
         [Test]
-        public void AveragePriceOrdersTest()
+        public async Task AveragePriceOrdersTest()
         {
             var orderService = new Mock<IOrderService>();
             var orders = new List<OrderDTO>();
@@ -225,11 +225,11 @@ namespace TakeoutSystem.Tests
                     new ItemOrderDTO { ItemId = 1, Price = 1.5m, Quantity = 3 }
                 }
             });
-            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(orders);
+            orderService.Setup(o => o.GetOrders(It.IsAny<OrderRequest>())).Returns(Task.FromResult(orders));
             var orderStatisticRequest = new OrderStatisticRequest();
 
             IOrderStatistics orderStatistics = new OrderStatisticts(orderService.Object);
-            var averagePriceOrders = orderStatistics.AveragePriceOrders(orderStatisticRequest);
+            var averagePriceOrders = await orderStatistics.AveragePriceOrders(orderStatisticRequest);
 
             Assert.That(averagePriceOrders == 8.5m);
         }

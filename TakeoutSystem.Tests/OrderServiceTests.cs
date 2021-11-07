@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using TakeoutSystem.Base;
@@ -118,7 +119,7 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void CreateOrderTest()
+        public async Task CreateOrderTest()
         {
             var orderCreationRequest = new OrderCreationRequest
             {
@@ -130,7 +131,7 @@ namespace TakeoutSystem.Tests
             orderCreationRequest.Items.Add(new OrderItemCreationRequest { ItemId = 100, Quantity = 3 });
 
             IOrderService orderService = new OrderService(_context);
-            var order = orderService.Create(orderCreationRequest);
+            var order = await orderService.Create(orderCreationRequest);
 
             Assert.That(order.ClientName == orderCreationRequest.ClientName);
             Assert.That(String.IsNullOrEmpty(order.OrderCode) == false);
@@ -145,14 +146,14 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void GetOrderTest()
+        public async Task GetOrderTest()
         {
             var clientName = "ClIENT-1001";
             var orderCode = "ORDER-CODE-001";
             var items = 2;
 
             IOrderService orderService = new OrderService(_context);
-            var order = orderService.GetOrder(orderCode);
+            var order = await orderService.GetOrder(orderCode);
 
             Assert.That(order.OrderCode == orderCode);
             Assert.That(order.ClientName == clientName);
@@ -160,7 +161,7 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void GetAllOrdersTest()
+        public async Task GetAllOrdersTest()
         {
             var orderActionRequest = new OrderRequest
             {
@@ -169,7 +170,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrders(orderActionRequest);
 
             for (var x = 0; x < orders.Count(); x++)
             {
@@ -178,7 +179,7 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void GetPendingOrdersTest()
+        public async Task GetPendingOrdersTest()
         {
             var orderActionRequest = new OrderRequest
             {
@@ -187,7 +188,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrders(orderActionRequest);
 
             for (var x = 0; x < orders.Count(); x++)
             {
@@ -197,7 +198,7 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void GetOrdersByDatesTest()
+        public async Task GetOrdersByDatesTest()
         {
             var orderActionRequest = new OrderRequest
             {
@@ -207,7 +208,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrders(orderActionRequest);
 
             for (var x = 0; x < orders.Count(); x++)
             {
@@ -217,7 +218,7 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void GetOrdersPaginationTest()
+        public async Task GetOrdersPaginationTest()
         {
             var orderActionRequest = new OrderRequest
             {
@@ -227,13 +228,13 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrders(orderActionRequest);
 
             Assert.That(orders.Count() == 2);
         }
 
         [Test]
-        public void GetServedOrdersTest()
+        public async Task GetServedOrdersTest()
         {
             var orderActionRequest = new OrderRequest
             {
@@ -241,7 +242,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var orders = orderService.GetOrders(orderActionRequest);
+            var orders = await orderService.GetOrders(orderActionRequest);
 
             for (var x = 0; x < orders.Count(); x++)
             {
@@ -250,14 +251,14 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void ServeOrderTest()
+        public async Task ServeOrderTest()
         {
             var orderActionRequest = new OrderActionRequest {
                 OrderCode = "ORDER-CODE-002"
             };
 
             IOrderService orderService = new OrderService(_context);
-            var order = orderService.Serve(orderActionRequest);
+            var order = await orderService.Serve(orderActionRequest);
 
             Assert.That(order.OrderCode == orderActionRequest.OrderCode);
             Assert.That(order.ServedAt != null);
@@ -265,7 +266,7 @@ namespace TakeoutSystem.Tests
         }
 
         [Test]
-        public void CancelOrderTest()
+        public async Task CancelOrderTest()
         {
             var orderActionRequest = new OrderActionRequest
             {
@@ -273,7 +274,7 @@ namespace TakeoutSystem.Tests
             };
 
             IOrderService orderService = new OrderService(_context);
-            var order = orderService.Cancel(orderActionRequest);
+            var order = await orderService.Cancel(orderActionRequest);
 
             Assert.That(order.OrderCode == orderActionRequest.OrderCode);
             Assert.That(order.ServedAt == null);
