@@ -20,31 +20,26 @@ namespace TakeoutSystem.Base
 
         public async Task<List<OrderDTO>> GetOrdersAsync(OrderRequest orderRequest)
         {
-            var query = _context.Orders.AsQueryable();
-
-            if (orderRequest.Status != null)
+            var query = _context.Orders.AsEnumerable();
+            var orderFilters = new Dictionary<string, Func<Order, object, bool>>()
             {
-                query = query.Where(o => o.Status == orderRequest.Status);
-            }
+                ["Status"] = (obj, value) => obj.Status == (int)value,
+                ["Served"] = (obj, value) => (bool)value ? obj.ServedAt != null : obj.ServedAt == null,
+                ["StartDate"] = (obj, value) => obj.CreatedAt >= (DateTime)value,
+                ["EndDate"] = (obj, value) => obj.CreatedAt <= (DateTime)value,
+                ["OnlyPending"] = (obj, value) => (bool)value == true ? obj.ServedAt == null : true
+            };
 
-            if (orderRequest.Served == true)
-            {
-                query = query.Where(o => o.ServedAt != null);
-            }
+            var filterRequest = orderRequest.GetType().GetProperties();
 
-            if (orderRequest.StartDate != null)
+            for (var i = 0; i < filterRequest.Count(); i++)
             {
-                query = query.Where(o => o.CreatedAt >= orderRequest.StartDate);
-            }
-
-            if (orderRequest.EndDate != null)
-            {
-                query = query.Where(o => o.CreatedAt <= orderRequest.EndDate);
-            }
-
-            if (orderRequest.OnlyPending.GetValueOrDefault() == true)
-            {
-                query = query.Where(o => o.ServedAt == null);
+                var filter = filterRequest[i].Name;
+                var value = orderRequest.GetType().GetProperty(filter).GetValue(orderRequest, null);
+                if (orderFilters.ContainsKey(filter) && value != null)
+                {
+                    query = query.Where(o => orderFilters[filter](o, value));
+                }
             }
 
             if (orderRequest.Page != null)
@@ -59,7 +54,7 @@ namespace TakeoutSystem.Base
                 query = query.Take(orderRequest.PageSize.GetValueOrDefault());
             }
 
-            var orders = await query.Select(o => new OrderDTO
+            var orders = query.Select(o => new OrderDTO
             {
                 OrderCode = o.OrderCode,
                 ClientName = o.ClientName,
@@ -67,7 +62,7 @@ namespace TakeoutSystem.Base
                 ServedAt = o.ServedAt,
                 Status = o.Status
             })
-                .ToListAsync();
+                .ToList();
             for (var i = 0; i < orders.Count; i++)
             {
                 var orderItems = await GetOrderItemsAsync(orders[i].OrderCode);

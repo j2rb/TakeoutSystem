@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -85,37 +84,45 @@ namespace TakeoutSystem.Base
                 row++;
                 column = 1;
                 worksheet.Cells[row++, column].Value = "Item Statistics";
-                worksheet.Cells[row, column++].Value = "Id";
-                worksheet.Cells[row, column++].Value = "Name";
-                worksheet.Cells[row, column++].Value = "Price";
-                worksheet.Cells[row, column++].Value = "Sold Quantity";
-                worksheet.Cells[row, column++].Value = "Sold Total Sum";
-                worksheet.Cells[row++, column].Value = "Share in Total Income";
-                for (var i = 0; i < items.Count; i++)
+                if (items.Count > 0)
                 {
-                    column = 1;
-                    worksheet.Cells[row, column++].Value = items[i].ItemId;
-                    worksheet.Cells[row, column++].Value = items[i].Name;
-                    worksheet.Cells[row, column++].Value = items[i].Price;
-                    worksheet.Cells[row, column++].Value = items[i].Total;
-                    worksheet.Cells[row, column++].Value = items[i].TotalSum;
-                    worksheet.Cells[row++, column].Value = items[i].ShareInTotalIncome;
+                    var itemProperties = items[0].GetType().GetProperties();
+                    for (var i = 0; i < items.Count; i++)
+                    {
+                        for (var j = 0; j < itemProperties.Count(); j++)
+                        {
+                            if (i == 0)
+                            {
+                                worksheet.Cells[row + i, column + j].Value = itemProperties[j].Name;
+                            }
+                            worksheet.Cells[row + i + 1, column + j].Value = items[i].GetType().GetProperty(itemProperties[j].Name).GetValue(items[i], null);
+                        }
+                    }
                 }
+                row = row + items.Count + 2;
 
-                row++;
-                column = 1;
                 worksheet.Cells[row++, column].Value = "Order Statistics";
-                worksheet.Cells[row, column++].Value = "Created";
-                worksheet.Cells[row, column++].Value = "Item Count";
-                worksheet.Cells[row, column++].Value = "Total Amount";
-                worksheet.Cells[row++, column].Value = "Finished";
-                for (var i = 0; i < orders.Count; i++)
+                var ordersData = orders.Select(o => new
                 {
-                    column = 1;
-                    worksheet.Cells[row, column++].Value = orders[i].CreatedAt.ToString("dd/MM/yy HH:mm");
-                    worksheet.Cells[row, column++].Value = orders[i].Items.Sum(i => i.Quantity);
-                    worksheet.Cells[row, column++].Value = "$ " + orders[i].Items.Sum(i => i.Price * i.Quantity).ToString("0.00");
-                    worksheet.Cells[row++, column].Value = orders[i].ServedAt == null ? "" : orders[i].ServedAt.GetValueOrDefault().ToString("dd/MM/yy HH:mm");
+                    Created = o.CreatedAt.ToString("dd/MM/yy HH:mm"),
+                    ItemCount = o.Items.Sum(i => i.Quantity),
+                    TotalAmount = "$ " + o.Items.Sum(i => i.Price * i.Quantity).ToString("0.00"),
+                    Finished = o.ServedAt == null ? "" : o.ServedAt.GetValueOrDefault().ToString("dd/MM/yy HH:mm")
+                }).ToList();
+                if (ordersData.Count > 0)
+                {
+                    var orderProperties = ordersData[0].GetType().GetProperties();
+                    for (var i = 0; i < ordersData.Count; i++)
+                    {
+                        for (var j = 0; j < orderProperties.Count(); j++)
+                        {
+                            if (i == 0)
+                            {
+                                worksheet.Cells[row + i, column + j].Value = orderProperties[j].Name;
+                            }
+                            worksheet.Cells[row + i + 1, column + j].Value = ordersData[i].GetType().GetProperty(orderProperties[j].Name).GetValue(ordersData[i], null);
+                        }
+                    }
                 }
                 report.Data = package.GetAsByteArray();
                 return report;
