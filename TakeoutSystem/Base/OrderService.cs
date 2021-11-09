@@ -12,6 +12,14 @@ namespace TakeoutSystem.Base
     public class OrderService : IOrderService
     {
         private readonly TodoContext _context;
+        private readonly Dictionary<String, Func<Order, object, bool>> orderFilters = new()
+        {
+            ["Status"] = (obj, value) => obj.Status == (int)value,
+            ["Served"] = (obj, value) => (bool)value ? obj.ServedAt != null : obj.ServedAt == null,
+            ["StartDate"] = (obj, value) => obj.CreatedAt >= (DateTime)value,
+            ["EndDate"] = (obj, value) => obj.CreatedAt <= (DateTime)value,
+            ["OnlyPending"] = (obj, value) => (bool)value == true ? obj.ServedAt == null : true
+        };
 
         public OrderService(TodoContext context)
         {
@@ -21,18 +29,9 @@ namespace TakeoutSystem.Base
         public async Task<List<OrderDTO>> GetOrdersAsync(OrderRequest orderRequest)
         {
             var query = _context.Orders.AsEnumerable();
-            var orderFilters = new Dictionary<string, Func<Order, object, bool>>()
-            {
-                ["Status"] = (obj, value) => obj.Status == (int)value,
-                ["Served"] = (obj, value) => (bool)value ? obj.ServedAt != null : obj.ServedAt == null,
-                ["StartDate"] = (obj, value) => obj.CreatedAt >= (DateTime)value,
-                ["EndDate"] = (obj, value) => obj.CreatedAt <= (DateTime)value,
-                ["OnlyPending"] = (obj, value) => (bool)value == true ? obj.ServedAt == null : true
-            };
-
             var filterRequest = orderRequest.GetType().GetProperties();
 
-            for (var i = 0; i < filterRequest.Count(); i++)
+            for (var i = 0; i < filterRequest.Length; i++)
             {
                 var filter = filterRequest[i].Name;
                 var value = orderRequest.GetType().GetProperty(filter).GetValue(orderRequest, null);
@@ -42,16 +41,13 @@ namespace TakeoutSystem.Base
                 }
             }
 
-            if (orderRequest.Page != null)
-            {
-                query = query.Skip(
-                    orderRequest.Page.GetValueOrDefault() * orderRequest.PageSize.GetValueOrDefault() - orderRequest.PageSize.GetValueOrDefault()
-                );
-            }
+            query = query.Skip(
+                orderRequest.Page.GetValueOrDefault(0) * orderRequest.PageSize.GetValueOrDefault(0) - orderRequest.PageSize.GetValueOrDefault(0)
+            );
 
             if (orderRequest.PageSize != null)
             {
-                query = query.Take(orderRequest.PageSize.GetValueOrDefault());
+                query = query.Take(orderRequest.PageSize.GetValueOrDefault(10));
             }
 
             var orders = query.Select(o => new OrderDTO
