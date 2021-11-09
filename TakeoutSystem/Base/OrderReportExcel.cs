@@ -13,6 +13,7 @@ namespace TakeoutSystem.Base
     {
         private readonly IOrderStatistics _orderStatistics;
         private readonly IOrderService _orderService;
+        private ExcelWorksheet worksheet;
 
         public OrderReportExcel(IOrderStatistics orderStatistics, IOrderService orderService)
         {
@@ -29,23 +30,21 @@ namespace TakeoutSystem.Base
             };
             using (ExcelPackage package = new ExcelPackage())
             {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets.Add("Order Statistics");
+                worksheet = package.Workbook.Worksheets.Add("Order Statistics");
                 int row = 1, column = 1;
-                worksheet.Cells[row, column].Value = "Takeout system report";
+                worksheet.Cells[row++, column].Value = "TAKEUOT SYSTEM REPORT";
 
-                row += 1;
-                worksheet.Cells[row, column++].Value = "For period from";
-                worksheet.Cells[row, column++].Value = startDate.ToString("MM/dd/yyyy");
-                worksheet.Cells[row++, column++].Value = endDate.ToString("MM/dd/yyyy");
+                worksheet.Cells[row, column].Value = "For period from";
+                worksheet.Cells[row, column + 1].Value = startDate.ToString("MM/dd/yyyy");
+                worksheet.Cells[row++, column + 2].Value = endDate.ToString("MM/dd/yyyy");
+                row++;
 
                 var orderStatisticRequest = new OrderStatisticRequest
                 {
                     StartDate = startDate,
                     EndDate = endDate
                 };
-
                 Dictionary<String, String> data = new Dictionary<String, String>();
-                data.Add("Summary", "");
                 data.Add("Total Orders", (await _orderStatistics.TotalCountAsync(orderStatisticRequest)).ToString());
                 var totalPriceOrders = await _orderStatistics.TotalPriceOrdersAsync(orderStatisticRequest);
                 data.Add("Total Sum", "$ " + totalPriceOrders);
@@ -54,13 +53,8 @@ namespace TakeoutSystem.Base
                 data.Add("Cancelled Orders", await _orderStatistics.CanceledOrdersCountAsync(orderStatisticRequest) + " (" + (await _orderStatistics.CanceledOrdersPercentageAsync(orderStatisticRequest)).ToString("0.00") + "%)");
                 data.Add("Average Serve Time", (await _orderStatistics.AverageServeTimeAsync(orderStatisticRequest) / 60).ToString("0.00") + " minutes");
 
-                row++;
-                foreach (var item in data)
-                {
-                    column = 1;
-                    worksheet.Cells[row, column++].Value = item.Key;
-                    worksheet.Cells[row++, column++].Value = data[item.Key];
-                }
+                WriteKeyPairValues("SUMMARY", data, row, column);
+                row = row + data.Count() + 2;
 
                 var orders = await _orderService.GetOrdersAsync(new OrderRequest
                 {
@@ -72,60 +66,60 @@ namespace TakeoutSystem.Base
                 var items = orderItems.GroupBy(i => new { i.ItemId, i.Name, i.Price })
                     .Select(i => new
                     {
-                        i.Key.ItemId,
-                        i.Key.Name,
-                        i.Key.Price,
+                        ItemId = i.Key.ItemId,
+                        Name = i.Key.Name,
+                        Price = i.Key.Price,
                         Total = i.Sum(i => i.Quantity),
                         TotalSum = i.Sum(i => i.Quantity * i.Price).ToString("0.00"),
                         ShareInTotalIncome = (i.Sum(i => i.Quantity * i.Price) / totalPriceOrders * 100).ToString("0.00") + "%"
                     })
                     .ToList();
 
-                row++;
-                column = 1;
-                worksheet.Cells[row++, column].Value = "Item Statistics";
-                if (items.Count > 0)
-                {
-                    var itemProperties = items[0].GetType().GetProperties();
-                    for (var i = 0; i < items.Count; i++)
-                    {
-                        for (var j = 0; j < itemProperties.Count(); j++)
-                        {
-                            if (i == 0)
-                            {
-                                worksheet.Cells[row + i, column + j].Value = itemProperties[j].Name;
-                            }
-                            worksheet.Cells[row + i + 1, column + j].Value = items[i].GetType().GetProperty(itemProperties[j].Name).GetValue(items[i], null);
-                        }
-                    }
-                }
-                row = row + items.Count + 2;
+                WriteEnumerable("ITEM STATISTICS", items, row, 1);
+                row = row + items.Count + 3;
 
-                worksheet.Cells[row++, column].Value = "Order Statistics";
-                var ordersData = orders.Select(o => new
+                var ordersData = orders.Select(o => new OrderReportDTO
                 {
                     Created = o.CreatedAt.ToString("dd/MM/yy HH:mm"),
                     ItemCount = o.Items.Sum(i => i.Quantity),
                     TotalAmount = "$ " + o.Items.Sum(i => i.Price * i.Quantity).ToString("0.00"),
                     Finished = o.ServedAt == null ? "" : o.ServedAt.GetValueOrDefault().ToString("dd/MM/yy HH:mm")
                 }).ToList();
-                if (ordersData.Count > 0)
-                {
-                    var orderProperties = ordersData[0].GetType().GetProperties();
-                    for (var i = 0; i < ordersData.Count; i++)
-                    {
-                        for (var j = 0; j < orderProperties.Count(); j++)
-                        {
-                            if (i == 0)
-                            {
-                                worksheet.Cells[row + i, column + j].Value = orderProperties[j].Name;
-                            }
-                            worksheet.Cells[row + i + 1, column + j].Value = ordersData[i].GetType().GetProperty(orderProperties[j].Name).GetValue(ordersData[i], null);
-                        }
-                    }
-                }
+                WriteEnumerable("ORDER STATISTICS", ordersData, row, 1);
+
                 report.Data = package.GetAsByteArray();
                 return report;
+            }
+        }
+
+        private void WriteKeyPairValues(String title, Dictionary<String, String> data, int row, int column)
+        {
+            worksheet.Cells[row++, column].Value = title;
+            foreach (var item in data)
+            {
+                worksheet.Cells[row, column].Value = item.Key;
+                worksheet.Cells[row++, column + 1].Value = data[item.Key];
+            }
+        }
+
+        private void WriteEnumerable(String title, IEnumerable<object> data, int row, int column)
+        {
+            worksheet.Cells[row++, column].Value = title;
+            var items = data.ToList();
+            if (items.Count > 0)
+            {
+                var itemProperties = items[0].GetType().GetProperties();
+                for (var i = 0; i < items.Count; i++)
+                {
+                    for (var j = 0; j < itemProperties.Count(); j++)
+                    {
+                        if (i == 0)
+                        {
+                            worksheet.Cells[row + i, column + j].Value = itemProperties[j].Name;
+                        }
+                        worksheet.Cells[row + i + 1, column + j].Value = items[i].GetType().GetProperty(itemProperties[j].Name).GetValue(items[i], null);
+                    }
+                }
             }
         }
     }
