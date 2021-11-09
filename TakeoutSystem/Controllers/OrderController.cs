@@ -25,15 +25,10 @@ namespace TakeoutSystem.Controllers
         // GET: Order
         [Route("/Order")]
         [HttpGet]
-        public async Task<ActionResult<List<OrderSimpleDTO>>> GetOrder(int? Page, int? PageSize, bool? OnlyPending)
+        public async Task<ActionResult<List<OrderSimpleDTO>>> GetOrder([FromQuery] OrderRequest orderRequest)
         {
-            var orderRequest = new OrderRequest
-            {
-                Page = Page.GetValueOrDefault(1),
-                PageSize = PageSize.GetValueOrDefault(10),
-                OnlyPending = OnlyPending.GetValueOrDefault(true),
-                Status = 1
-            };
+            orderRequest.OnlyPending = orderRequest.OnlyPending.GetValueOrDefault(true);
+            orderRequest.Status = 1;
             var orders = await _orderService.GetOrdersAsync(orderRequest);
             return _autoMapper.Map<List<OrderSimpleDTO>>(orders);
         }

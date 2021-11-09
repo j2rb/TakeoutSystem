@@ -41,14 +41,13 @@ namespace TakeoutSystem.Base
                 }
             }
 
-            query = query.Skip(
-                orderRequest.Page.GetValueOrDefault(0) * orderRequest.PageSize.GetValueOrDefault(0) - orderRequest.PageSize.GetValueOrDefault(0)
-            );
-
             if (orderRequest.PageSize != null)
             {
                 query = query.Take(orderRequest.PageSize.GetValueOrDefault(10));
             }
+            query = query.Skip(
+                orderRequest.Page.GetValueOrDefault(0) * orderRequest.PageSize.GetValueOrDefault(10) - orderRequest.PageSize.GetValueOrDefault(10)
+            );
 
             var orders = query.Select(o => new OrderDTO
             {
