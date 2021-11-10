@@ -18,7 +18,8 @@ namespace TakeoutSystem.Base
             ["Served"] = (obj, value) => (bool)value ? obj.ServedAt != null : obj.ServedAt == null,
             ["StartDate"] = (obj, value) => obj.CreatedAt >= (DateTime)value,
             ["EndDate"] = (obj, value) => obj.CreatedAt <= (DateTime)value,
-            ["OnlyPending"] = (obj, value) => (bool)value == true ? obj.ServedAt == null : true
+            ["OnlyPending"] = (obj, value) => (bool)value == true ? obj.ServedAt == null : true,
+            ["OrderCode"] = (obj, value) => obj.OrderCode.Equals((String)value)
         };
 
         public OrderService(TodoContext context)
@@ -69,24 +70,10 @@ namespace TakeoutSystem.Base
 
         public async Task<OrderDTO> GetOrderAsync(String orderCode)
         {
-            Order order = _context.Orders.SingleOrDefault(o => o.OrderCode.Equals(orderCode));
-            if (order != null)
+            var order = await GetOrdersAsync(new OrderRequest { OrderCode = orderCode });
+            if (order.Count() > 0)
             {
-                var orderItems = await GetOrderItemsAsync(orderCode);
-                var result = await _context.Orders
-                    .Where(o => o.OrderCode.Equals(orderCode))
-                    .Select(o => new OrderDTO
-                    {
-                        OrderCode = o.OrderCode,
-                        ClientName = o.ClientName,
-                        Status = o.Status,
-                        CreatedAt = o.CreatedAt,
-                        ServedAt = o.ServedAt,
-                        Total = orderItems.Count(),
-                        Items = orderItems
-                    })
-                    .ToListAsync();
-                return result.First();
+                return order.First();
             }
             else
             {
@@ -111,6 +98,32 @@ namespace TakeoutSystem.Base
         }
 
         public async Task<OrderDTO> CreateAsync(OrderCreationRequest orderCreationRequest)
+        {
+            await ValidateOrderCreationRequest(orderCreationRequest);
+            IOrderCodeGenerator orderCodeGenerator = new OrderCodeGenerator();
+            var order = new Order
+            {
+                OrderCode = orderCodeGenerator.GetCode(),
+                ClientName = orderCreationRequest.ClientName,
+                CreatedAt = DateTime.Now,
+                Status = 1
+            };
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+            for (var i = 0; i < orderCreationRequest.Items.Count; i++)
+            {
+                _context.OrderItems.Add(new OrderItem
+                {
+                    OrderId = order.OrderId,
+                    ItemId = orderCreationRequest.Items[i].ItemId,
+                    Quantity = orderCreationRequest.Items[i].Quantity
+                });
+                await _context.SaveChangesAsync();
+            }
+            return await GetOrderAsync(order.OrderCode);
+        }
+
+        private async Task ValidateOrderCreationRequest(OrderCreationRequest orderCreationRequest)
         {
             if (String.IsNullOrEmpty(orderCreationRequest.ClientName))
             {
@@ -147,27 +160,6 @@ namespace TakeoutSystem.Base
                     }
                 }
             }
-            IOrderCodeGenerator orderCodeGenerator = new OrderCodeGenerator();
-            var order = new Order
-            {
-                OrderCode = orderCodeGenerator.GetCode(),
-                ClientName = orderCreationRequest.ClientName,
-                CreatedAt = DateTime.Now,
-                Status = 1
-            };
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-            for (var i = 0; i < orderCreationRequest.Items.Count; i++)
-            {
-                _context.OrderItems.Add(new OrderItem
-                {
-                    OrderId = order.OrderId,
-                    ItemId = orderCreationRequest.Items[i].ItemId,
-                    Quantity = orderCreationRequest.Items[i].Quantity
-                });
-                await _context.SaveChangesAsync();
-            }
-            return await GetOrderAsync(order.OrderCode);
         }
 
         public async Task<OrderDTO> CancelAsync(OrderActionRequest orderActionRequest)
