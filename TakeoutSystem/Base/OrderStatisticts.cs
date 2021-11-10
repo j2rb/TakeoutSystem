@@ -30,19 +30,16 @@ namespace TakeoutSystem.Base
 
         public async Task<decimal> CanceledOrdersPercentageAsync(OrderStatisticRequest orderStatisticRequest)
         {
-            try
+            var allOrders = await _orderService.GetOrdersAsync(new OrderRequest
             {
-                var allOrders = await _orderService.GetOrdersAsync(new OrderRequest
-                {
-                    StartDate = orderStatisticRequest.StartDate,
-                    EndDate = orderStatisticRequest.EndDate
-                });
-                return Math.Round((decimal)allOrders.Count(o => o.Status == 0) / allOrders.Count() * 100, 2);
-            }
-            catch (DivideByZeroException)
+                StartDate = orderStatisticRequest.StartDate,
+                EndDate = orderStatisticRequest.EndDate
+            });
+            if (allOrders.Count() == 0)
             {
                 return 0;
             }
+            return Math.Round((decimal)allOrders.Count(o => o.Status == 0) / allOrders.Count() * 100, 2);
         }
 
         public async Task<decimal> AverageItemsPerOrderAsync(OrderStatisticRequest orderStatisticRequest)
@@ -52,33 +49,27 @@ namespace TakeoutSystem.Base
                 StartDate = orderStatisticRequest.StartDate,
                 EndDate = orderStatisticRequest.EndDate
             });
-            try
-            {
-                return Math.Round((decimal)orders.Sum(o => o.Items.Sum(i => i.Quantity)) / orders.Count(), 2);
-            }
-            catch (DivideByZeroException)
+            if (orders.Count() == 0)
             {
                 return 0;
             }
+            return Math.Round((decimal)orders.Sum(o => o.Items.Sum(i => i.Quantity)) / orders.Count(), 2);
         }
 
         public async Task<decimal> AverageServeTimeAsync(OrderStatisticRequest orderStatisticRequest)
         {
-            try
+            var servedOrders = await _orderService.GetOrdersAsync(new OrderRequest
             {
-                var servedOrders = await _orderService.GetOrdersAsync(new OrderRequest
-                {
-                    Status = 1,
-                    Served = true,
-                    StartDate = orderStatisticRequest.StartDate,
-                    EndDate = orderStatisticRequest.EndDate
-                });
-                return Math.Round((decimal)servedOrders.Sum(o => (o.ServedAt.GetValueOrDefault() - o.CreatedAt).TotalSeconds) / servedOrders.Count(), 2);
-            }
-            catch (DivideByZeroException)
+                Status = 1,
+                Served = true,
+                StartDate = orderStatisticRequest.StartDate,
+                EndDate = orderStatisticRequest.EndDate
+            });
+            if (servedOrders.Count() == 0)
             {
                 return 0;
             }
+            return Math.Round((decimal)servedOrders.Sum(o => (o.ServedAt.GetValueOrDefault() - o.CreatedAt).TotalSeconds) / servedOrders.Count(), 2);
         }
 
         public async Task<int> TotalCountAsync(OrderStatisticRequest orderStatisticRequest)
@@ -116,19 +107,16 @@ namespace TakeoutSystem.Base
 
         public async Task<decimal> AveragePriceOrdersAsync(OrderStatisticRequest orderStatisticRequest)
         {
-            try
+            var orders = await _orderService.GetOrdersAsync(new OrderRequest
             {
-                var orders = await _orderService.GetOrdersAsync(new OrderRequest
-                {
-                    StartDate = orderStatisticRequest.StartDate,
-                    EndDate = orderStatisticRequest.EndDate
-                });
-                return Math.Round((decimal)orders.Sum(o => o.Items.Sum(i => i.Price * i.Quantity)) / orders.Count(), 2);
-            }
-            catch (DivideByZeroException)
+                StartDate = orderStatisticRequest.StartDate,
+                EndDate = orderStatisticRequest.EndDate
+            });
+            if (orders.Count() == 0)
             {
                 return 0;
             }
+            return Math.Round((decimal)orders.Sum(o => o.Items.Sum(i => i.Price * i.Quantity)) / orders.Count(), 2);
         }
     }
 }
