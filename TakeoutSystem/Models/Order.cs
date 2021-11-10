@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace TakeoutSystem.Models
 {
+    [Index(nameof(OrderCode)), Index(nameof(CreatedAt)), Index(nameof(ServedAt))]
     public class Order
     {
         public int OrderId { get; set; }
