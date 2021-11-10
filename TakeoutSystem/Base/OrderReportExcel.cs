@@ -21,12 +21,12 @@ namespace TakeoutSystem.Base
             _orderService = orderService;
         }
 
-        public async Task<ReportFileDTO> GetReportAsync(DateTime startDate, DateTime endDate)
+        public async Task<ReportFileDTO> GetReportAsync(ReportRequest reportRequest)
         {
             var report = new ReportFileDTO
             {
                 ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                FileName = "TakeoutReport_" + startDate.ToString("yyyy-MM-dd") + "_to_" + endDate.ToString("yyyy-MM-dd") + ".xlsx",
+                FileName = "TakeoutReport_" + reportRequest.StartDate.ToString("yyyy-MM-dd") + "_to_" + reportRequest.EndDate.ToString("yyyy-MM-dd") + ".xlsx",
             };
             using (ExcelPackage package = new ExcelPackage())
             {
@@ -35,14 +35,14 @@ namespace TakeoutSystem.Base
                 worksheet.Cells[row++, column].Value = "TAKEUOT SYSTEM REPORT";
 
                 worksheet.Cells[row, column].Value = "For period from";
-                worksheet.Cells[row, column + 1].Value = startDate.ToString("MM/dd/yyyy");
-                worksheet.Cells[row++, column + 2].Value = endDate.ToString("MM/dd/yyyy");
+                worksheet.Cells[row, column + 1].Value = reportRequest.StartDate.ToString("MM/dd/yyyy");
+                worksheet.Cells[row++, column + 2].Value = reportRequest.EndDate.ToString("MM/dd/yyyy");
                 row++;
 
                 var orderStatisticRequest = new OrderStatisticRequest
                 {
-                    StartDate = startDate,
-                    EndDate = endDate
+                    StartDate = reportRequest.StartDate,
+                    EndDate = reportRequest.EndDate
                 };
                 Dictionary<String, String> data = new Dictionary<String, String>();
                 data.Add("Total Orders", (await _orderStatistics.TotalCountAsync(orderStatisticRequest)).ToString());
@@ -58,8 +58,8 @@ namespace TakeoutSystem.Base
 
                 var orders = await _orderService.GetOrdersAsync(new OrderRequest
                 {
-                    StartDate = startDate,
-                    EndDate = endDate
+                    StartDate = reportRequest.StartDate,
+                    EndDate = reportRequest.EndDate
                 });
 
                 var orderItems = orders.SelectMany(o => o.Items);

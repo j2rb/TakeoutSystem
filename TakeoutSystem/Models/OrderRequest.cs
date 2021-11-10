@@ -1,7 +1,7 @@
 ﻿using System;
 namespace TakeoutSystem.Models
 {
-    public class OrderRequest
+    public class OrderRequest : OrderActionRequest
     {
         public int? Page { get; set; }
         public int? PageSize { get; set; }
@@ -10,6 +10,5 @@ namespace TakeoutSystem.Models
         public bool? Served { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public String OrderCode { get; set; }
     }
 }

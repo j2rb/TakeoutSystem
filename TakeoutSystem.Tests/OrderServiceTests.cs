@@ -153,7 +153,7 @@ namespace TakeoutSystem.Tests
             var items = 2;
 
             IOrderService orderService = new OrderService(_context);
-            var order = await orderService.GetOrderAsync(orderCode);
+            var order = await orderService.GetOrderAsync(new OrderRequest { OrderCode = orderCode });
 
             Assert.That(order.OrderCode == orderCode);
             Assert.That(order.ClientName == clientName);
@@ -223,7 +223,7 @@ namespace TakeoutSystem.Tests
             var orderActionRequest = new OrderRequest
             {
                 OnlyPending = false,
-                Page = 2,
+                Page = 1,
                 PageSize = 2
             };
 

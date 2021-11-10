@@ -37,9 +37,9 @@ namespace TakeoutSystem.Controllers
         // GET: Order/Details
         [Route("/Order/Details")]
         [HttpGet]
-        public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails(String OrderCode)
+        public async Task<ActionResult<OrderDetailsDTO>> GetOrderDetails([FromQuery] OrderRequest orderRequest)
         {
-            var order = await _orderService.GetOrderAsync(OrderCode);
+            var order = await _orderService.GetOrderAsync(orderRequest);
             if (order != null)
             {
                 return _autoMapper.Map<OrderDetailsDTO>(order);

@@ -41,9 +41,9 @@ namespace TakeoutSystem.Controllers
         // GET: Orders
         [Route("/Reports/Orders")]
         [HttpGet]
-        public async Task<IActionResult> GetExcelReport(DateTime StartDate, DateTime EndDate)
+        public async Task<IActionResult> GetExcelReport([FromQuery] ReportRequest reportRequest)
         {
-            var report = await _orderReport.GetReportAsync(StartDate, EndDate);
+            var report = await _orderReport.GetReportAsync(reportRequest);
             return File(report.Data, report.ContentType, report.FileName);
         }
     }

@@ -68,9 +68,9 @@ namespace TakeoutSystem.Base
             return orders;
         }
 
-        public async Task<OrderDTO> GetOrderAsync(String orderCode)
+        public async Task<OrderDTO> GetOrderAsync(OrderRequest orderRequest)
         {
-            var order = await GetOrdersAsync(new OrderRequest { OrderCode = orderCode });
+            var order = await GetOrdersAsync(orderRequest);
             if (order.Count() > 0)
             {
                 return order.First();
@@ -120,7 +120,7 @@ namespace TakeoutSystem.Base
                 });
                 await _context.SaveChangesAsync();
             }
-            return await GetOrderAsync(order.OrderCode);
+            return await GetOrderAsync(new OrderRequest { OrderCode = order.OrderCode });
         }
 
         private async Task ValidateOrderCreationRequest(OrderCreationRequest orderCreationRequest)
@@ -172,7 +172,7 @@ namespace TakeoutSystem.Base
                 order.Status = 0;
                 _context.Entry(order).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                return await GetOrderAsync(orderActionRequest.OrderCode);
+                return await GetOrderAsync(new OrderRequest { OrderCode = orderActionRequest.OrderCode });
             }
             else
             {
@@ -190,7 +190,7 @@ namespace TakeoutSystem.Base
                 order.ServedAt = DateTime.Now;
                 _context.Entry(order).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                return await GetOrderAsync(orderActionRequest.OrderCode);
+                return await GetOrderAsync(new OrderRequest { OrderCode = orderActionRequest.OrderCode });
             }
             else
             {
